@@ -1,0 +1,1337 @@
+---
+title: "Analysis of BMJ submission data over time. Are there more papers and reviews submitted on weekends, holidays and late nights?"
+author: "Adrian Barnett"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+# basic set up
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, message=FALSE, error=FALSE, comment='', dpi=400)
+options(width=1000, scipen = 999) # Wide pages and no scientific numbers
+library(R2WinBUGS)
+library(season) # for yrfrac
+library(lme4) # for glmer
+library(broom)
+library(stringr)
+library(tables)
+source('3_tidy_table.R') # for my table tidying
+library(pander)
+panderOptions('table.emphasize.rownames', FALSE)
+panderOptions('keep.trailing.zeros', TRUE)
+panderOptions('table.split.table', Inf)
+panderOptions('table.split.cells', Inf)
+panderOptions('big.mark', ',')
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+g.theme = theme_bw() + theme(panel.grid.minor = element_blank())
+# set up colours
+cbPalette = c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+library(RColorBrewer)
+top.ten.colours = brewer.pal(n = 10, name = "Paired") # for top ten, from diverging palette
+
+## load the author and reviewer data
+load('data/BMJAnalysisReadyAuthors.RData') # authors from 1_bmj_submission_data.R
+load('data/BMJAnalysisReadyReviewers.RData') # reviewers from 1_bmj_reviewer_data.R
+reviewer = dplyr::select(reviewer, -lon, -lat, -timezoneId, -city, -address) %>% # drop variables not used here
+  mutate(type='Reviews')
+submission = dplyr::select(submission, -lon, -lat, -timezoneId, -city, -address) %>% # drop variables not used here
+  mutate(type='Submission')
+both = bind_rows(reviewer, submission)
+# dates for text below
+min.date = min(as.Date(submission$local.date))
+max.date = max(as.Date(submission$local.date))
+# top ten countries for reviews and submissions (used below)
+tab = table(submission$country)
+top.ten = names(tab[order(-tab)])[1:10]
+tab = table(reviewer$country)
+top.ten.reviews = names(tab[order(-tab)])[1:10]
+# dates from windows for seasonal analysis (used below)
+for.merge = data.frame(window = seq(1,400,1)) %>%
+  mutate(date = as.Date('2012-01-02')+(window*7)) # start on Jan 2nd
+```
+
+# Modelling approach
+
+All statistical models were fitted using a Bayesian approach and therefore show 95% credible intervals instead of confidence intervals. Credible intervals have the more intuitive interpretation of having a 95% probability of containing the true estimate. We do not use p-values.
+
+When describing changes over time we sometimes use the word "slope".
+
+# Flow diagrams of data
+
+The diagrams below show what journal submissions and reviews were included in the final analyses.
+
+## Diagram for submissions
+
+```{r flow.diagram, fig.width=5, fig.height=6}
+source('2_consort_flow.R')
+plot.it(sub, header='Submissions', type='rmarkdown')
+```
+
+## Diagram for reviews
+
+```{r flow.diagram.reviews, fig.width=5, fig.height=5}
+plot.it(rev, header='Reviews', type='rmarkdown')
+```
+
+# Summary data on numbers
+
+## Journal numbers
+
+The data are from the journals _BMJ_ and _BMJ Open_.
+
+```{r}
+tab = tabular(Heading('Type')*factor(type) ~ (Heading('Journal')*journal + 1)*((n=1) + Percent('row')), data=both)
+pander(tab, digits=0)
+```
+
+## Journal submissions and reviews over time
+
+```{r plot.over.time, fig.width=9, fig.height=6}
+# prepare data for plot
+over.time = mutate(both, year = as.numeric(format(local.date, '%Y')), # make month and year
+                   month = as.numeric(format(local.date, '%m')),
+                   yrmon = year + ((month-1)/12)) %>%
+  filter(year < 2019) %>% # remove few papers submitted on 31 December that fall into next time year after timezone adjustment
+  group_by(type, journal, yrmon) %>%
+  summarise(count = n())
+tplot = ggplot(data=over.time, aes(x=yrmon, y=count, col=journal))+
+  geom_point()+
+  geom_line()+
+  scale_color_manual('Journal', values=cbPalette[3:4])+
+  xlab('Time')+
+  ylab('Monthly number of submissions/reviews')+
+  g.theme +
+  theme(legend.position = c(0.14,0.8))+
+  facet_wrap(~type, scales='free_y')
+tplot
+```
+
+The plot shows the number of submissions and reviews over time for the two journals.
+There has been a clear increase in monthly submissions for _BMJ Open_ with a mirrored increase in review numbers, although on a much larger scale.
+
+This plot is potentially commercial-in-confidence and we should check if _BMJ_ are happy for it to appear in reports.
+
+# Times of day
+
+Here we examine the time-of-day pattern of submissions and reviews by weekdays vs weekends. Using all the countries created plots that were too busy, hence we only show the top ten countries.
+
+The percents are by country and weekday/weekend, so the percents add to 100% for each country on weekdays, and also add to 100% on weekends. 
+
+## Star plots of submissions by hour of day for top ten countries
+
+The star plots show the percentages of submissions made in each country and also split by the weekday and weekend.
+The aim is to see what times of the day researchers are most active and if there are noticeable differences between countries.
+
+```{r star.plots, fig.width=13, fig.height=13}
+## star plots
+# join lines from midnight, see here https://stackoverflow.com/questions/41842249/join-gap-in-polar-line-ggplot-plot
+
+# prepare the data for the plot by calculating percents within country and weekend/weekday
+to.plot.star = filter(submission, country %in% top.ten) %>%
+  mutate(local.hour = floor(local.hour)) %>%
+  group_by(country, local.hour, weekend) %>%
+  summarise(count = n()) %>%
+  group_by(country, weekend) %>%
+  mutate(n = sum(count),
+         percent = 100*count/n) %>%
+  ungroup() 
+# add extra grouping of Europe to help separate lines
+to.plot.star = mutate(to.plot.star, 
+                      Europe = as.numeric(country %in% c('Denmark','France','Netherlands','UK','Sweden')),
+                      Europe = factor(Europe, levels=0:1, labels=c('Non-Europe','Europe')))
+# make bridges to join circles
+bridges = filter(to.plot.star, local.hour==0) %>%
+  mutate(local.hour = 23.99) # just before midnight 
+to.plot.star.bridges = bind_rows(to.plot.star, bridges) %>%
+  arrange(country, local.hour)
+# plot
+hour.star = ggplot(data=to.plot.star.bridges, aes(x=local.hour, y=percent, col=country)) +
+  geom_path()+
+#  geom_point()+
+  coord_polar(start=0)+
+  scale_x_continuous(limits = c(0,24), minor_breaks = seq(0, 24, 1), breaks=seq(0,24,3))+
+  xlab('Hour of day')+
+  ylab('Frequency')+
+  facet_grid(Europe ~ weekend)+
+  ylab('Percent')+
+  scale_color_manual('', values=top.ten.colours)+
+  g.theme +
+  theme(text = element_text(size=20))
+hour.star
+```
+
+The lines are smoother on weekdays because of the larger sample size.
+
+### Line plots of submission times
+
+This plot shows the same information as the star plot, but using a linear time axis.
+
+```{r non-star, fig.width=13, fig.height=13}
+hour.nonstar = ggplot(data=to.plot.star, aes(x=local.hour, y=percent, col=country)) +
+  geom_line(size=1.1)+
+  scale_x_continuous(limits = c(0,24), minor_breaks = seq(0, 24, 1), breaks=seq(0,24,6))+
+  xlab('Hour of day')+
+  ylab('Frequency')+
+  facet_grid(Europe~weekend)+
+  ylab('Percent')+
+  scale_color_manual('', values=top.ten.colours)+
+  g.theme +
+  theme(text = element_text(size=20))
+hour.nonstar
+```
+
+As well as the obvious diurnal pattern, there does appear to be a slight increase in submissions just before midnight.
+
+## Star plots of reviews by hour of day for top ten countries
+
+The star plots show the percentages of reviews made in each country and also split by the weekday and weekend.
+
+```{r star.plots.reviews, fig.width=12, fig.height=12}
+## star plots
+# prepare the data for the plot by calculating percents within country and weekend/weekday
+to.plot.star.review = filter(reviewer, country %in% top.ten.reviews) %>%
+  mutate(local.hour = floor(local.hour)) %>% # re-format Yes/No categories, but just for these plots
+  group_by(country, local.hour, weekend) %>%
+  summarise(count = n()) %>%
+  group_by(country, weekend) %>%
+  mutate(n = sum(count),
+         percent = 100*count/n) %>%
+  ungroup() 
+# add extra grouping of Europe to help separate lines
+to.plot.star.review = mutate(to.plot.star.review, 
+                      Europe = as.numeric(country %in% c('Denmark','France','Netherlands','UK','Sweden')),
+                      Europe = factor(Europe, levels=0:1, labels=c('Non-Europe','Europe')))
+# make bridges to join circles
+bridges = filter(to.plot.star.review, local.hour==0) %>%
+  mutate(local.hour = 23.99) # just before midnight 
+to.plot.star.review.bridges = bind_rows(to.plot.star.review, bridges) %>%
+  arrange(country, local.hour)
+# plot
+hour.star = ggplot(data=to.plot.star.review.bridges, aes(x=local.hour, y=percent, col=country)) +
+  geom_path()+
+#  geom_point()+
+  coord_polar(start=0)+
+  scale_x_continuous(limits = c(0,24), minor_breaks = seq(0, 24, 1), breaks=seq(0,24,3))+
+  xlab('Hour of day')+
+  ylab('Frequency')+
+  facet_grid(Europe ~ weekend)+
+  ylab('Percent')+
+  scale_color_manual('', values=top.ten.colours)+
+  g.theme +
+  theme(text = element_text(size=20))
+hour.star
+```
+
+### Line plots of review times
+
+This plot shows the same information as the star plot, but using a linear time axis.
+
+```{r non-star.review, fig.width=12, fig.height=12}
+hour.nonstar = ggplot(data=to.plot.star.review, aes(x=local.hour, y=percent, col=country)) +
+  geom_line(size=1.1)+
+  scale_x_continuous(limits = c(0,24), minor_breaks = seq(0, 24, 1), breaks=seq(0,24,6))+
+  xlab('Hour of day')+
+  ylab('Frequency')+
+  facet_grid(Europe~weekend)+
+  ylab('Percent')+
+  scale_color_manual('', values=top.ten.colours)+
+  g.theme +
+  theme(text = element_text(size=20))
+hour.nonstar
+```
+
+As well as the obvious diurnal pattern, there may be small lunch time peaks in some countries.
+
+## Line plots of the ratio of submissions to reviews by hour of day for the top ten countries
+
+The plot below shows the ratio of the percentage of submissions to reviews, so it combines the data from the above line plots. The aim is to show times when relatively more submissions are received than reviews. The plot uses percents and not absolute numbers, so it looks at the relative difference in activity. There are far more reviews than submissions, so if we used absolute numbers any relative change would be lost.
+
+```{r star.plots.ratio, fig.width=12, fig.height=7}
+## make ratio of star plots,
+to.plot.star = rename(to.plot.star, 'submission' = 'percent') %>%
+  dplyr::select(-count, -n)
+to.plot.star.review = rename(to.plot.star.review, 'review' = 'percent') %>%
+  dplyr::select(-count, -n)
+ratio = left_join(to.plot.star, to.plot.star.review, by=c('country','local.hour','Europe','weekend')) %>%
+  mutate(ratio = submission / review) 
+# plot
+ratio.plot = ggplot(data=ratio, aes(x=local.hour, y=ratio, col=country)) +
+  geom_line(size=1.05)+
+  geom_hline(yintercept=1, lty=2)+
+  scale_x_continuous(limits = c(0,24), minor_breaks = seq(0, 24, 1), breaks=seq(0,24,3))+
+  xlab('Hour of day')+
+  ylab('Frequency')+
+  facet_grid(Europe~weekend)+
+  ylab('Ratio')+
+  annotate('text', x=0, y=1.9, label='More submissions', hjust=0)+
+  annotate('text', x=0, y=0.1, label='More reviews', hjust=0)+
+  scale_color_manual('', values=top.ten.colours)+
+  coord_cartesian(ylim=c(0,2))+ # truncate because of few extremes in early mornings on weekends
+  g.theme +
+  theme(text = element_text(size=20))
+ratio.plot
+```
+
+The percent axis has been truncated as there were a few very large estimates in early mornings on weekends, but these had small sample sizes.
+
+# Weekends
+
+In this section we tabulate, plot and model the data on weekend submissions and reviews.
+
+## Submissions
+
+The table shows the overall frequency of submissions on weekdays and weekends in the top ten submitting countries.
+
+```{r table.weekends}
+to.table = filter(submission, country %in% top.ten) %>%
+  mutate(country = factor(as.character(country))) # remove empty categories
+tab = tabular(Heading('Country')*country + 1 ~  Heading('')*weekend*( (n=1) + Heading('%')*Percent('row')*Format(digits=3)), data=to.table)
+pander(tab)
+```
+
+## Reviews
+
+The table shows the overall frequency of reviews on weekdays and weekends in the top ten reviewing countries.
+
+```{r table.weekends.reviews}
+to.table = filter(reviewer, country %in% top.ten.reviews) %>%
+  mutate(country = factor(as.character(country))) # remove empty categories
+tab = tabular(Heading('Country')*country + 1 ~  Heading('')*weekend*( (n=1) + Heading('%')*Percent('row')*Format(digits=3)), data=to.table)
+pander(tab)
+```
+
+## Plots of weekdays by year
+
+The aim is to look for a trend over time in the percent of weekend submissions and reviews.
+The plots show the annual numbers of submissions and reviews by day of the week from 2012 to 2018.
+
+### Submissions
+
+```{r plot.submissions, fig.width=11, fig.height=7}
+# combine into weekends vs weekdays
+wdays = c('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday')
+wdays2 = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday')
+to.plot = mutate(submission, 
+                 year = as.numeric(format(local.date, '%Y')), # make year and weekday
+         weekday = as.numeric(format(local.date, '%w')),
+         weekday = factor(weekday, levels=0:6, labels=wdays),
+         weekday = ordered(weekday, levels=wdays2)) %>% # order with Monday first
+  filter(year < 2019) %>% # remove papers from 2019 for this plot so that we have full years
+  group_by(year, journal, weekday) %>% # stratify by year and journal
+  summarise(count = n()) %>%
+  group_by(year, journal) %>%
+  mutate(sum = sum(count), # counts by year and journal
+         percent = 100*count/sum) %>%
+  ungroup()
+# plot
+wplot = ggplot(data=to.plot, aes(x=year, y=percent, col=weekday))+
+  geom_line(lwd=1.1)+
+  scale_color_manual(NULL, values=cbPalette[1:7])+
+  ylab('Submission percentages')+
+  xlab('Year')+
+  g.theme + 
+  theme(legend.position = 'right', legend.direction = 'vertical', text=element_text(size=16))+
+  facet_wrap(~journal)
+wplot
+```
+
+### Reviews
+
+```{r plot.reviews, fig.width=11, fig.height=7}
+to.plot = mutate(reviewer, year = as.numeric(format(local.date, '%Y')), # make year and weekday
+         weekday = as.numeric(format(local.date, '%w')),
+         weekday = factor(weekday, levels=0:6, labels=wdays),
+         weekday = ordered(weekday, levels=wdays2)) %>% # order with Monday first
+  filter(year < 2019) %>% # remove papers from 2019 for this plot so that we have full years
+  group_by(year, journal, weekday) %>% # stratify by year and journal
+  summarise(count = n()) %>%
+  group_by(year, journal) %>%
+  mutate(sum = sum(count), # counts by year and journal
+         percent = 100*count/sum) %>%
+  ungroup()
+# plot
+wplot = ggplot(data=to.plot, aes(x=year, y=percent, col=weekday))+
+  geom_line(lwd=1.1)+
+  scale_color_manual(NULL, values=cbPalette[1:7])+
+  ylab('Review percentages')+
+  xlab('Year')+
+  g.theme + 
+  theme(legend.position = 'right', legend.direction = 'vertical', text=element_text(size=16))+
+  facet_wrap(~journal)
+wplot
+```
+
+The most common day for reviews was Monday and the least common day was Saturday.
+
+## Plot of weekend percents by week-to-week results
+
+The plots below aim to examine the trend over time in weekend submissions and reviews. They show the Weekly percentage of submitted papers and reviewers on the weekend. The blue line is a non-linear smooth using a loess with a span of 0.75.
+
+### Submissions
+
+```{r week2week.submissions, fig.width=12, fig.height=7}
+# first get axis labels in years by window numbers
+axis.labels = mutate(submission, 
+                     year=format(local.date, '%Y'),
+                     month=format(local.date, '%m'),
+                     day=format(local.date, '%d')) %>%
+  filter(month=='01', day=='02') %>% # use Jan 2nd because Jan 1st was excluded as it was not a full week
+  dplyr::select(year, window) %>%
+  unique()
+# plot weekends by week-to-week
+for.plot = arrange(submission, local.date) %>%
+  group_by(window, journal, weekend) %>%
+  summarise(count = n()) %>%
+  tidyr::spread(key=weekend, value=count) %>% # put weekends and weekdays on same row
+  mutate(Weekday = ifelse(is.na(Weekday), 0, Weekday), # replace missing with zero
+         Weekend = ifelse(is.na(Weekend), 0, Weekend),
+         denom = Weekday + Weekend,
+         percent = 100*Weekend/denom)
+tplot = ggplot(data=for.plot, aes(x=window, y=percent))+
+  geom_line()+
+  geom_smooth(col='skyblue', se = FALSE, method='loess', span=0.75)+
+  g.theme+
+  scale_x_continuous(breaks=axis.labels$window, labels=axis.labels$year)+
+  ylab('Weekly percent')+
+  xlab('Time')+
+  facet_wrap(~journal)+
+  theme(text = element_text(size=16))
+tplot
+```
+
+The estimated trends shows a small increase in weekend submissions over time.
+
+### Reviews
+
+```{r week2week.reviewers, fig.width=12, fig.height=7}
+# plot weekends by week-to-week
+for.plot = arrange(reviewer, local.date) %>%
+  group_by(window, journal, weekend) %>%
+  summarise(count = n()) %>%
+  tidyr::spread(key=weekend, value=count) %>% # put weekends and weekdays on same row
+  mutate(Weekday = ifelse(is.na(Weekday), 0, Weekday), # replace missing with zero
+         Weekend = ifelse(is.na(Weekend), 0, Weekend),
+         denom = Weekday + Weekend,
+         percent = 100*Weekend/denom)
+tplot = ggplot(data=for.plot, aes(x=window, y=percent))+
+  geom_line()+
+  geom_smooth(col='skyblue', se = FALSE, method='loess', span=0.75)+
+  g.theme+
+  scale_x_continuous(breaks=axis.labels$window, labels=axis.labels$year)+
+  ylab('Weekly percent')+
+  xlab('Time')+
+  facet_wrap(~journal)+
+  theme(text = element_text(size=16))
+tplot
+```
+
+There does appear to be a small increase over time in weekend reviews, especially for BMJ Open.
+
+# Statistical models - weekend submissions
+
+Here we examine a relative increase in weekend submissions over time using a binomial model.
+We run separate models in each of the two journals.
+We used a country-specific intercept for each country to control for differences between countries in the probability of submitting on the weekend.
+We plot the country-specific intercepts to show the differences between countries. We exclude countries with small numbers from the plots.
+
+In terms of the change over time in weekend submissions, we use two models.
+The simpler model assumes the change is the same in every country.
+The more complex model allows a country-specific change over time.
+We plot the country-specific changes.
+
+We examine a seasonal pattern in submissions using a sinusoidal model with an annual cycle. We allow the seasonal pattern to vary by country. We plot the overall season pattern and the phase and amplitude in each country. The phase is the timing of the seasonal peak and the amplitude is its height.
+
+We compare the fit of the models using the deviance information criterion.
+
+## BMJ weekend submissions
+
+This section examines journal submissions on the weekend to the BMJ.
+
+### Best fitting model
+
+First we examine the deviance information criterion (DIC) to find the best model
+
+```{r best.bmj.weekend.submissions}
+DIC = DIC.best = NULL
+which.outcome = 'weekend'
+which.data.text = 'submissions' # data with windows
+which.data.text.update = 'submissions.weekend'
+which.data = get(which.data.text.update)
+which.journal  = 'BMJ'
+for (type in c('slope','intercept')){
+  for (season in c(TRUE, FALSE)){
+    source('99_jags_filename.R') # create filenames for data, chains and results
+    l = length(dir('Z:/weekend', pattern=jags.filename.results)) # flag that results exist
+    load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+    DIC = bind_rows(DIC, dic.frame)
+  }
+}
+DIC = mutate(DIC, Difference = DIC - min(DIC)) 
+to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+  arrange(DIC)
+pander(to.table, digits=0, style='simple')
+# load the results for the best model and store best DIC for later use
+best = filter(DIC, Difference==0) 
+DIC.best = bind_rows(DIC.best, best)
+type = best$model
+season = ifelse(best$season=='Season', TRUE, FALSE)
+source('99_jags_filename.R') # create filenames for data, chains and results
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+```
+
+The best model (smallest DIC) has both a country-specific slope and a seasonal pattern. Hence we show the results for this model below.
+
+### Table of parameter estimates for best model for weekend submissions to BMJ
+
+```{r best.bmj.weekend.submission.results}
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+The intercept is the overall average and the change is the annual change in probability. Both are on a logit scale because we used a binomial model.
+The two estimated probabilities are for 2012 and 2013 and are used to show the annual difference in weekend submissions. The difference is the absolute increase in probability per year. The ratio is the relative change in probability per year.
+
+There was little change over time in the probability of submitting on the weekend.
+
+### Plot of country-specific intercepts and 95% credible intervals for weekend submissions to BMJ
+
+The plot below shows the estimated weekend probability in each country. 
+The aim is to look for interesting differences between countries in the probability of submitting papers on the weekend.
+The 95% credible intervals are wider for countries with fewer submissions.
+The countries are ordered by their mean probability, making it easier to spot patterns which countries have similar means.
+
+```{r plot.intercepts.bmj.submissions}
+source('2_plot_intercepts.R')
+iplot
+```
+
+There are large differences between countries in the probability of submitting on the weekend. The lowest average probability is in India and the highest average in China. In China the probability is very high and almost equivalent to an equal probability on any day of the week as 2 days out of 7 is a probability of 0.29.
+
+### Plot of country-specific slopes and 95% credible intervals for weekend submissions to BMJ
+
+```{r plot.slopes.bmj.submissions}
+source('2_plot_slopes.R')
+splot
+```
+
+The dotted vertical line is the average change over time, which is close to zero indicating no change across all countries. Japan has the largest average increase over time in weekend submissions and Austria the smallest average.
+
+### Plot of seasonal estimates for weekend submissions to BMJ
+
+The plots are: i) the average sinusoidal seasonal pattern, ii) the country-specific seasonal pattern using a circular plot. The position of the dot shows the phase, which is the location of the peak. January is at 12 o'clock on the circle and July at 6 o'clock. Dots close to the centre have only a weak seasonal pattern, whereas those further towards the edge have a stronger seasonal pattern (amplitude).
+
+```{r plot.season.bmj.weekend.submissions, fig.width=13, fig.height=6.5}
+source('2_plot_season.R')
+grid.arrange(mplot, seasonplot, nrow = 1)
+```
+
+The seasonal pattern in submissions peaks in January with an odds ratio of 1.1. The country-specific estimates show a number of countries close to the centre, meaning they have little seasonal pattern. The strongest seasonal patterns are in Israel, Norway, Finland and New Zealand.
+
+## BMJ Open weekend submissions
+
+This section examines journal submissions on the weekend to BMJ Open.
+
+### Best fitting model
+
+First we examine the deviance information criterion (DIC) to find the best model
+
+```{r best.bmjopen.weekend.submissions}
+DIC = NULL
+which.outcome = 'weekend'
+which.data.text = 'submissions' # data with windows
+which.data.text.update = 'submissions.weekend' #
+which.data = get(which.data.text.update)
+which.journal  = 'BMJ Open'
+for (type in c('slope','intercept')){
+  for (season in c(TRUE, FALSE)){
+    source('99_jags_filename.R') # create filenames for data, chains and results
+    l = length(dir('Z:/weekend', pattern=jags.filename.results)) # flag that results exist
+    load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+    DIC = bind_rows(DIC, dic.frame)
+  }
+}
+DIC = mutate(DIC, Difference = DIC - min(DIC)) 
+to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+  arrange(DIC)
+pander(to.table, digits=0, style='simple')
+# load the results for the best model
+best = filter(DIC, Difference==0)
+DIC.best = bind_rows(DIC.best, best)
+type = best$model
+season = ifelse(best$season=='Season', TRUE, FALSE)
+source('99_jags_filename.R') # create filenames for data, chains and results
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+```
+
+The best model has a country-specific slope and season, hence we show the results for this model below.
+
+### Table of parameter estimates for best model for weekend submissions to BMJ Open
+
+```{r best.bmjopen.weekend.submission.results}
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+There was no difference in the overall probability of weekend submissions over time.
+
+### Plot of country-specific intercepts and 95% credible intervals for weekend submissions to BMJ Open
+
+```{r plot.intercepts.bmjopen.weekend.submissions}
+source('2_plot_intercepts.R')
+iplot
+```
+
+There is a very large difference between countries in the probability of weekend submissions to BMJ Open. China and Saudi Arabia both also have relatively high probabilities of weekend submissions.
+
+### Plot of country-specific slopes and 95% credible intervals for weekend submissions to BMJ Open
+
+```{r plot.slopes.bmjopen.weekend.submissions}
+source('2_plot_slopes.R')
+splot
+```
+
+The dotted vertical line is the mean which is close to zero meaning no change across all countries. Malaysia had the largest mean increase in weekend submissions over time, but the uncertainty around this mean was large. 
+
+# Statistical models - weekend reviews
+
+In this section we examine reviews on the weekend.
+
+## BMJ weekend reviews
+
+This section examines journal reviews on the weekend to the BMJ.
+
+### Best fitting model for BMJ weekend reviews
+
+First we examine the deviance information criterion (DIC) to find the best model
+
+```{r best.bmj.weekend.reviews}
+DIC = NULL
+which.outcome = 'weekend'
+which.data.text = 'reviews' # data with windows
+which.data.text.update = 'reviews.weekend'
+which.data = get(which.data.text.update)
+which.journal  = 'BMJ'
+for (type in c('slope','intercept')){
+  for (season in c(TRUE, FALSE)){
+    source('99_jags_filename.R') # create filenames for data, chains and results
+    l = length(dir('Z:/weekend', pattern=jags.filename.results)) # flag that results exist
+    load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+    DIC = bind_rows(DIC, dic.frame)
+  }
+}
+DIC = mutate(DIC, Difference = DIC - min(DIC)) 
+to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+  arrange(DIC)
+pander(to.table, digits=0, style='simple')
+# load the results for the best model
+best = filter(DIC, Difference==0)
+DIC.best = bind_rows(DIC.best, best) # store best DIC for later use
+type = best$model
+season = ifelse(best$season=='Season', TRUE, FALSE)
+source('99_jags_filename.R') # create filenames for data, chains and results
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+```
+
+### Table of parameter estimates for best model for weekend reviews to BMJ
+
+```{r best.bmj.weekend.reviews.results}
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+There was no change in the probability of weekend reviews over time.
+
+### Plot of country-specific intercepts and 95% credible intervals for weekend reviews to BMJ
+
+```{r plot.intercepts.bmj.weekends.reviews}
+source('2_plot_intercepts.R')
+iplot
+```
+
+Finland had the lowest probability of weekend reviews and Austria the highest.
+
+### Plot of country-specific slopes and 95% credible intervals for weekend reviews to BMJ
+
+```{r plot.slopes.bmj.weekends.reviews}
+source('2_plot_slopes.R')
+splot
+```
+
+There was a relatively small variation in slopes between countries.
+
+### Plot of seasonal estimates for weekend reviews to BMJ
+
+```{r plot.season.bmj.weekend.reviews, fig.width=13, fig.height=6.5}
+source('2_plot_season.R')
+grid.arrange(mplot, seasonplot, nrow = 1)
+```
+
+The seasonal pattern was mixed. A relatively large number of countries peaked in December and January. Sweden was a notable outlier with a peak in late May.
+
+## BMJ Open weekend reviews
+
+This section examines journal reviews on the weekend to the BMJ Open.
+
+### Best fitting model for BMJ Open weekend reviews
+
+First we examine the deviance information criterion (DIC) to find the best model
+
+```{r best.bmjopen.weekend.reviews}
+DIC = NULL
+which.outcome = 'weekend'
+which.data.text = 'reviews' # data with windows
+which.data.text.update = 'reviews.weekend'
+which.data = get(which.data.text.update)
+which.journal  = 'BMJ Open'
+for (type in c('slope','intercept')){
+  for (season in c(TRUE, FALSE)){
+    source('99_jags_filename.R') # create filenames for data, chains and results
+    l = length(dir('Z:/weekend', pattern=jags.filename.results)) # flag that results exist
+    load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+    DIC = bind_rows(DIC, dic.frame)
+  }
+}
+DIC = mutate(DIC, Difference = DIC - min(DIC)) 
+to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+  arrange(DIC)
+pander(to.table, digits=0, style='simple')
+# load the results for the best model
+best = filter(DIC, Difference==0)
+if(any(DIC$Difference>0 & DIC$Difference<1)){
+  best = filter(DIC, Difference>0, Difference<1) # shift to second best because hardly any difference
+}
+DIC.best = bind_rows(DIC.best, best) # store best DIC for later use
+type = best$model
+season = ifelse(best$season=='Season', TRUE, FALSE)
+source('99_jags_filename.R') # create filenames for data, chains and results
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+```
+
+There is a tie for the best model between a seasonal model with a country-specific slope and common slope. We choose the common slope because this is the simpler model.
+
+### Table of parameter estimates for best model for weekend reviews to BMJ Open
+
+```{r best.bmjopen.weekend.reviews.results}
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+There was a very small increase in weekend reviews over time.
+
+### Plot of country-specific intercepts and 95% credible intervals for weekend reviews to BMJ Open
+
+```{r plot.intercepts.bmjopen.weekends.reviews}
+source('2_plot_intercepts.R')
+iplot
+```
+
+There is a large variability between countries in the probability of weekend reviews. The highest probability is in Israel and the lowest in Ireland.
+
+### Plot of seasonal estimates for weekend reviews to BMJ Open
+
+```{r plot.season.bmjopen.weekend.reviews, fig.width=13, fig.height=6.5}
+source('2_plot_season.R')
+grid.arrange(mplot, seasonplot, nrow = 1)
+```
+
+There is a relatively weak season pattern of a peak in odds of over 1.02 in August. The strongest seasonal patterns are in Norway, Japan and South Korea.
+
+# Statistical models - evenings and late night submissions
+
+## BMJ late night submissions
+
+This section examines journal submissions on evenings and late nights to the BMJ.
+
+### Best fitting model
+
+First we examine the deviance information criterion (DIC) to find the best model
+
+```{r best.bmj.latenight.submissions}
+DIC = NULL
+which.outcome = 'latenight'
+which.data.text = 'submissions' # data with windows
+which.data.text.update = 'submissions.latenight'
+which.data = get(which.data.text.update)
+which.journal  = 'BMJ'
+for (type in c('slope','intercept')){
+  for (season in c(TRUE, FALSE)){
+    source('99_jags_filename.R') # create filenames for data, chains and results
+    l = length(dir('Z:/weekend', pattern=jags.filename.results)) # flag that results exist
+    load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+    DIC = bind_rows(DIC, dic.frame)
+  }
+}
+DIC = mutate(DIC, Difference = DIC - min(DIC)) 
+to.table = dplyr::select(DIC, -journal, -outcome, -data) %>% # information already in title
+  arrange(DIC)
+pander(to.table, digits=0, style='simple')
+# load the results for the best model
+best = filter(DIC, Difference==0)
+DIC.best = bind_rows(DIC.best, best) # store best DIC for later use
+type = best$model
+season = ifelse(best$season=='Season', TRUE, FALSE)
+source('99_jags_filename.R') # create filenames for data, chains and results
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+```
+
+The best model has a country-specific season but common slope, hence we show the results for this model below. This means there is no plot of the country-specific slope for this outcome.
+
+### Table of parameter estimates for best model
+
+```{r best.bmj.latenight.submission.results}
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+There was a very small increase in the overall probability of late night submissions over time.
+
+### Plot of country-specific intercepts and 95% credible intervals for late night submissions to BMJ
+
+```{r plot.intercepts.bmj.latenight.submissions}
+source('2_plot_intercepts.R')
+iplot
+```
+
+There is a large variability between countries in the probability of late night submissions. Denmark had by far the lowest probability and China had easily the largest. Two other countries with a high probability were Taiwan and Japan.
+
+### Plot of seasonal estimates for late night submissions to BMJ
+
+```{r plot.season.bmj.latenight.submissions, fig.width=13, fig.height=6.5}
+source('2_plot_season.R')
+grid.arrange(mplot, seasonplot, nrow = 1)
+```
+
+There is a strong seasonal pattern to late night submissions with a peak in the mean odds ratio close to 1.2 in late June. The country-specific seasonal pattern shows that almost every country has a peak in the middle six months of the year. Switzerland has no seasonal pattern in late night submissions.
+
+## BMJ Open late night submissions
+
+This section examines journal submissions on evenings and late nights to the BMJ Open.
+
+### Best fitting model
+
+First we examine the deviance information criterion (DIC) to find the best model
+
+```{r best.bmjopen.latenight.submissions}
+DIC = NULL
+which.outcome = 'latenight'
+which.data.text = 'submissions' # data with windows
+which.data.text.update = 'submissions.latenight'
+which.data = get(which.data.text.update)
+which.journal  = 'BMJ Open'
+for (type in c('slope','intercept')){
+  for (season in c(TRUE, FALSE)){
+    source('99_jags_filename.R') # create filenames for data, chains and results
+    l = length(dir('Z:/weekend', pattern=jags.filename.results)) # flag that results exist
+    load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+    DIC = bind_rows(DIC, dic.frame)
+  }
+}
+DIC = mutate(DIC, Difference = DIC - min(DIC)) 
+to.table = dplyr::select(DIC, -journal, -outcome, -data) %>% # information already in title
+  arrange(DIC)
+pander(to.table, digits=0, style='simple')
+# load the results for the best model
+best = filter(DIC, Difference==0)
+DIC.best = bind_rows(DIC.best, best) # store best DIC for later use
+type = best$model
+season = ifelse(best$season=='Season', TRUE, FALSE)
+source('99_jags_filename.R') # create filenames for data, chains and results
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+```
+
+The best model has a country-specific slope and season, hence we show the results for this model below.
+
+### Table of parameter estimates for best model for late night submissions to BMJ Open
+
+```{r best.bmjopen.latenight.submission.results}
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+There was no large difference in the overall probability of late night submissions over time.
+
+### Plot of country-specific intercepts and 95% credible intervals for late night submissions to BMJ Open
+
+```{r plot.intercepts.bmjopen.latenight.submissions}
+source('2_plot_intercepts.R')
+iplot
+```
+
+Denmark and New Zealand have the two lowest probabilities of late night submissions. The two highest probabilities are in China and Iran.
+
+### Plot of country-specific slopes and 95% credible intervals for late night submissions to BMJ Open
+
+```{r plot.slopes.bmjopen.latenight.submissions}
+source('2_plot_slopes.R')
+splot
+```
+
+There was relatively little variability in the slopes between countries. Ethiopia had a decline over time in late night submissions, whilst China had an increase.
+
+### Plot of seasonal estimates for late night submissions to BMJ Open
+
+```{r plot.season.bmjopen.latenight.submissions, fig.width=13, fig.height=6.5}
+source('2_plot_season.R')
+grid.arrange(mplot, seasonplot, nrow = 1)
+```
+
+Late night submissions are strongly seasonal with a peak in late July. The peak also occurs in Southern hemisphere countries (Australia and Brazil). This may be because of the academic year rather than any seasonal change (e.g., daylight hours), with the northern hemisphere academic calander being the most important set of dates that even southern hemisphere countries follow.
+
+# Statistical models - evenings and late night reviews
+
+## BMJ late night reviews
+
+This section examines journal reviews on the weekend to the BMJ.
+
+### Best fitting model for BMJ late night reviews
+
+First we examine the deviance information criterion (DIC) to find the best model
+
+```{r best.bmj.latenight.reviews}
+DIC = NULL
+which.outcome = 'latenight'
+which.data.text = 'reviews' # data with windows
+which.data.text.update = 'reviews.latenight'
+which.data = get(which.data.text.update)
+which.journal  = 'BMJ'
+for (type in c('slope','intercept')){
+  for (season in c(TRUE, FALSE)){
+    source('99_jags_filename.R') # create filenames for data, chains and results
+    l = length(dir('Z:/weekend', pattern=jags.filename.results)) # flag that results exist
+    load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+    DIC = bind_rows(DIC, dic.frame)
+  }
+}
+DIC = mutate(DIC, Difference = DIC - min(DIC)) 
+to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+  arrange(DIC)
+pander(to.table, digits=0, style='simple')
+# load the results for the best model
+best = filter(DIC, Difference==0)
+DIC.best = bind_rows(DIC.best, best) # store best DIC for later use
+type = best$model
+season = ifelse(best$season=='Season', TRUE, FALSE)
+source('99_jags_filename.R') # create filenames for data, chains and results
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+```
+
+The best model has a country-specific slope and season, hence we show the results for that model below.
+
+### Table of parameter estimates for best model for late night reviews to BMJ
+
+```{r best.bmj.latenight.reviews.results}
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+There was no change over time in the probability of late night reviews.
+
+### Plot of country-specific intercepts and 95% credible intervals for late night reviews to BMJ
+
+```{r plot.intercepts.bmj.latenight.reviews}
+source('2_plot_intercepts.R')
+iplot
+```
+
+There was a large variability in the probability of late night reviews. Australia had the lowest probability and Austria the highest.
+
+### Plot of country-specific slopes and 95% credible intervals for late night reviews to BMJ
+
+```{r plot.slopes.bmj.latenight.reviews}
+source('2_plot_slopes.R')
+splot
+```
+
+The dotted vertical line shows the average overall change, which is close to zero. Finland had an increase over time in the probability of late night reviews.
+
+### Plot of seasonal estimates for late night reviews to BMJ 
+
+```{r plot.season.bmj.latenight.reviews, fig.width=13, fig.height=6.5}
+source('2_plot_season.R')
+grid.arrange(mplot, seasonplot, nrow = 1)
+```
+
+There is a strong seasonal pattern in late night reviews with a peak in odds of over 1.2 in June. All countries have their peak between May and August, with the strongest patterns in Australia and Finland.
+
+## BMJ Open late night reviews
+
+This section examines journal reviews on the weekend to the BMJ.
+
+### Best fitting model for BMJ Open late night reviews
+
+First we examine the deviance information criterion (DIC) to find the best model
+
+```{r best.bmjopen.latenight.reviews}
+DIC = NULL
+which.outcome = 'latenight'
+which.data.text = 'reviews' # data with windows
+which.data.text.update = 'reviews.latenight'
+which.data = get(which.data.text.update)
+which.journal  = 'BMJ Open'
+for (type in c('slope','intercept')){
+  for (season in c(TRUE, FALSE)){
+    source('99_jags_filename.R') # create filenames for data, chains and results
+    l = length(dir('Z:/weekend', pattern=jags.filename.results)) # flag that results exist
+    load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+    DIC = bind_rows(DIC, dic.frame)
+  }
+}
+DIC = mutate(DIC, Difference = DIC - min(DIC)) 
+to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+  arrange(DIC)
+pander(to.table, digits=0, style='simple')
+# load the results for the best model
+best = filter(DIC, Difference==0)
+DIC.best = bind_rows(DIC.best, best) # store best DIC for later use
+type = best$model
+season = ifelse(best$season=='Season', TRUE, FALSE)
+source('99_jags_filename.R') # create filenames for data, chains and results
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+```
+
+The best model has a country-specific slope and season, hence we show the results for that model below.
+
+### Table of parameter estimates for best model for late night reviews to BMJ Open
+
+```{r best.bmjopen.latenight.reviews.results}
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+There was little difference in the probability of late night reviews over time.
+
+### Plot of country-specific intercepts and 95% credible intervals for late night reviews to BMJ Open
+
+```{r plot.intercepts.bmjopen.latenight.reviews, fig.width=5, fig.height=6}
+source('2_plot_intercepts.R')
+iplot
+```
+
+There is a wide variation between countries in the probability of late night reviews. Portugal and Greece have the highest probability. South Africa has by far the lowest probability. South Africa has sometimes experienced widespread electricity blackouts. 
+
+### Plot of country-specific slopes and 95% credible intervals for late night reviews to BMJ Open
+
+```{r plot.slopes.bmjopen.latenight.reviews, fig.width=5, fig.height=6}
+source('2_plot_slopes.R')
+splot
+```
+
+The strongest decrease over time in late night reviews was in Germany.
+
+### Plot of seasonal estimates for late night reviews to BMJ Open 
+
+```{r plot.season.bmjopen.latenight.reviews, fig.width=13, fig.height=6.5}
+source('2_plot_season.R')
+grid.arrange(mplot, seasonplot, nrow = 1)
+```
+
+There was a strong seasonal pattern in late night reviews with a peak odds ratio of over 1.1 in July. The peak for most countries is between May and September, with the strongest average seasonal pattern in Belgium.
+
+# Holidays
+
+In this section we examine the probability of submissions and reviews on national holidays. We only examine weeks that included a holiday and model the probability of a submission or review on a holiday compared with the other days in that week.
+
+## Submissions to BMJ
+
+```{r bmj.holiday.submission.results}
+# write out filename
+jags.filename.results = 'JAGS.holiday.Submission.BMJ.intercept.NoSeason.results.RData'
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R 
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+### Plot of country-specific intercepts and 95% credible intervals for holiday submissions to BMJ
+
+```{r plot.intercepts.bmj.submissions.holidays}
+source('2_plot_intercepts_holiday.R')
+iplot
+```
+
+## Submissions to BMJ Open
+
+```{r bmjopen.holiday.submission.results}
+# write out filename
+jags.filename.results = 'JAGS.holiday.Submission.BMJ Open.intercept.NoSeason.results.RData'
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R 
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+### Plot of country-specific intercepts and 95% credible intervals for holiday submissions to BMJ Open
+
+```{r plot.intercepts.bmjopen.submissions.holidays}
+source('2_plot_intercepts_holiday.R')
+iplot
+```
+
+## Reviews to BMJ
+
+```{r bmj.holiday.reviews.results}
+# write out filename
+jags.filename.results = 'JAGS.holiday.Reviews.BMJ.intercept.NoSeason.results.RData'
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R 
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+### Plot of country-specific intercepts and 95% credible intervals for holiday reviews to BMJ
+
+```{r plot.intercepts.bmj.reviews.holidays}
+source('2_plot_intercepts_holiday.R')
+iplot
+```
+
+## Reviews to BMJ Open
+
+```{r bmjopen.holiday.reviews.results}
+# write out filename
+jags.filename.results = 'JAGS.holiday.Reviews.BMJ Open.intercept.NoSeason.results.RData'
+load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R 
+# output table
+to.table = tidy.table(ests)
+pander(to.table, digits=3)
+```
+
+### Plot of country-specific intercepts and 95% credible intervals for holiday reviews to BMJ Open
+
+```{r plot.intercepts.bmjopen.reviews.holidays}
+source('2_plot_intercepts_holiday.R')
+iplot
+```
+
+# Summary plot of reviews and submissions by hour of day
+
+The plot shows the percent of submissions and reviews by hour, split by each journal.
+The blue shaded area shows the working hours.
+
+```{r summary.24hour.plot, fig.width=11, fig.height=6}
+# get counts, then percents
+for.plot = mutate(both, hour = floor(local.hour),
+                  type = ifelse(type=='Submission', 'Submissions', type)) %>% # tiny change to label
+  group_by(type, journal, hour) %>%
+  summarise(count = n()) %>% 
+  group_by(type, journal) %>%
+  mutate(total = sum(count),
+    perc = 100*count/total) %>%
+  ungroup()
+# plot
+plot = ggplot(data=for.plot, aes(x=hour, y=perc, col=factor(journal)))+
+  geom_rect(xmin=6.5, xmax=17.5, ymin=-Inf, ymax=Inf, fill=grey(0.9), alpha=0.2, inherit.aes=FALSE)+ # in hours period
+  geom_vline(xintercept = c(6,12,18), col=grey(0.8))+ # home-made grid because of rect
+  geom_hline(yintercept = seq(2,10,2), col=grey(0.8))+ # home-made grid because of rect
+  geom_point()+
+#  geom_bar(stat='identity')+ not so good
+  scale_color_manual(NULL, values=c('dark red','dark blue'))+
+  scale_x_continuous(breaks=c(0,6,12,18,24))+
+  scale_y_continuous(breaks=c(0,2,4,6,8,10), limits = c(0, NA))+
+  geom_line()+
+  theme_bw()+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  xlab('Hour of day')+
+  ylab('Percent')+
+  facet_wrap(~type, scale='free_y')
+plot
+jpeg('figures/timeday.jpg', width=6, height=4, units='in', res=400, quality=100)
+print(plot)
+invisible(dev.off())
+```
+
+# Summary plot of country-specific probabilities
+
+```{r include=FALSE}
+# get ranks and averages from process jags (loop through)
+to.tile = to.mean.plot = table.time = NULL
+for (k in 1:nrow(DIC.best)){
+  which.outcome = DIC.best$outcome[k]
+  which.data.text = DIC.best$data[k]
+  which.data.text.update = paste(which.data.text, '.', which.outcome, sep='')
+  which.journal = DIC.best$journal[k]
+  type = DIC.best$model[k]
+  season = ifelse(DIC.best$season[k] == 'Season', TRUE, FALSE)
+  source('99_jags_filename.R') # create filenames for data, chains and results
+  load(paste('Z:/weekend/', jags.filename.results, sep='')) # from process.jags.R on HPC
+  # store changes over time for later table
+  this.time = filter(ests, var %in% c('diff','ratio')) %>%
+    mutate(outcome = which.outcome, journal = which.journal, data=which.data.text)
+  table.time = bind_rows(table.time, this.time)
+  # get ranks for tile plot
+  ranks = mutate(ranks, k=k, outcome = which.outcome, journal = which.journal, data=which.data.text)
+  to.tile = bind_rows(to.tile, ranks)
+  # get averages for mean plot
+  averages = filter(ests, var=='p', num==2) %>% # average probability in year 2
+    mutate(k=k, outcome = which.outcome, journal = which.journal, data=which.data.text)
+  to.mean.plot = bind_rows(to.mean.plot, averages)
+}
+# now add the holiday estimates
+for (which.data.text in c('Submission','Reviews')){
+  for (which.journal in c('BMJ','BMJ Open')){
+    k = k + 1 # add index
+    jags.filename.results = paste('JAGS.holiday.', which.data.text, '.', which.journal, '.intercept.NoSeason.results.RData', sep='')
+    load(paste('Z:/weekend/', jags.filename.results, sep=''))
+  # store changes over time for later table
+  this.time = filter(ests, var %in% c('diff','ratio')) %>% # difference or ratio
+    mutate(outcome = 'holiday', journal = which.journal, data=which.data.text)
+  table.time = bind_rows(table.time, this.time)
+  # get ranks for tile plot
+    which.data.text.convert = ifelse(which.data.text=='Submission', 'submissions', 'reviews') # tiny edit
+  ranks = mutate(ranks, k=k, outcome = 'holiday', journal = which.journal, data=which.data.text.convert)
+  to.tile = bind_rows(to.tile, ranks)
+    # get averages for mean plot 
+  averages = filter(ests, var=='overall') %>%
+    mutate(mean = inv.logit(mean),
+           lower = inv.logit(lower),
+           upper = inv.logit(upper), 
+           k=k, outcome = 'holiday', journal = which.journal, data=which.data.text)
+  to.mean.plot = bind_rows(to.mean.plot, averages)
+
+  }
+}
+```
+
+The plot below summarises the twelve models using the countries' estimated probabilities. It shows each country's relative rank with 0 (blue) meaning they were the lowest ranked country, 1 (red) the highest, and 0.5 (white) in the middle. We do not show countries with small numbers. The countries are ordered based on their average probability. The plot only shows the mean rank and not the variability in rank.
+
+```{r tile.plot, fig.width=10, fig.height=8}
+# process tile data data
+to.plot = filter(to.tile, Count > 100) %>% # remove small counts
+  group_by(Country) %>%
+  mutate(n = n(), overall = mean(median)) %>% # mean of median
+  filter(n == 12) %>% # must have all 12 rows
+  ungroup() %>%
+  select(-outcome, -journal, -n)
+ordering = group_by(to.plot, Country) %>%# order by high to low
+  slice(1) %>% # first row only
+  ungroup() %>%
+  arrange(overall) %>% # arrange by overall median
+  mutate(rank = 1:n()) %>% 
+  select(Country, rank) %>%
+  mutate(xaxis = factor(rank, labels=Country))
+# x-axis labels
+j.labels = dplyr::select(to.tile, k, journal) %>% unique() 
+j.labels = j.labels$journal
+to.plot = left_join(to.plot, ordering, by='Country')
+# add specific missing row for Ireland so that it shows in green - no longer needed
+add = filter(to.plot, Country=='Ireland', k==1) %>% # build on current data because its easier
+  mutate(k=11, median=NA)
+to.plot = bind_rows(add, to.plot)
+# plot
+tile = ggplot(data=to.plot, aes(x=xaxis, y=k, fill=median))+
+  geom_tile()+
+  xlab('')+
+  ylab('')+
+  scale_y_continuous(breaks=1:12, labels=j.labels, expand = c(0,0))+
+  scale_fill_gradient2('Rank', low = 'dark blue', mid = 'white', high='dark red', na.value='light green', midpoint = 0.5, breaks=c(0.03, 0.5, 1), labels=c('Lowest','Median','Highest'))+
+  g.theme+
+  coord_flip(clip = 'off')+
+  theme(text = element_text(size=13),
+        axis.text.y = element_text(size=15),
+    plot.margin=unit(c(0.7,0,1,0),"cm")) + # increase margin = top, then right, bottom and left
+  # add vertical lines
+  geom_hline(yintercept = c(4.5,8.5)) + # Add vertical lines to tile plot to split holidays, late nights, and weekends
+  # axis label outside the plot
+  geom_text(y=1.5, x=-0.5, label='Submissions', size=4.5, fontface='plain')+
+  geom_text(y=3.5, x=-0.5, label='Reviews', size=4.5, fontface='plain')+
+  geom_text(y=5.5, x=-0.5, label='Submissions', size=4.5, fontface='plain')+
+  geom_text(y=7.5, x=-0.5, label='Reviews', size=4.5, fontface='plain')+
+  geom_text(y=9.5, x=-0.5, label='Submissions', size=4.5, fontface='plain')+
+  geom_text(y=11.5, x=-0.5, label='Reviews', size=4.5, fontface='plain')+
+  #
+  geom_text(y=2.5, x=-1, label='Weekends', size=4.5, fontface='plain')+
+  geom_text(y=6.5, x=-1, label='Late nights', size=4.5, fontface='plain')+
+  geom_text(y=10.5, x=-1, label='Holidays', size=4.5, fontface='plain')+
+  # repeat at top
+  geom_text(y=2.5, x=17, label='Weekends', size=4.5, fontface='plain')+
+  geom_text(y=6.5, x=17, label='Late nights', size=4.5, fontface='plain')+
+  geom_text(y=10.5, x=17, label='Holidays', size=4.5, fontface='plain')
+tile
+jpeg('figures/tile.jpg', width=10, height=8, units='in', res=400, quality = 100)
+print(tile)
+invisible(dev.off())
+```
+
+China often had the highest probability of any country for submissions and reviews, but were on or below the median rank on holidays. 
+Japan also had relatively high probabilities.
+
+Three Scandinavian countries (Norway, Finland and Denmark) had some of the lowest probabilities. Sweden appeared relatively high, but all it's estimates were still in the lower half of countries.
+
+Three mediterranean countries (Spain, Italy and France) have relatively high probabilties. Many workplaces in Spain have a siesta during the day and working in the evenings is relatively normal.
+
+# Summary plot of overall probabilities, means and 95% credible intervals
+
+The plot below shows the overall probabilities of reviews and submissions on weekends and late nights. These are the overall averages across all countries together with the 95% credible intervals.
+
+```{r mean.summary, fig.width=6, fig.height=4.5}
+to.mean.plot.final = mutate(to.mean.plot,
+            data = ifelse(data %in% c('reviews','Reviews'), 'Reviews', 'Submissions'),
+            x = as.numeric(journal=='BMJ Open') + as.numeric(data=='Reviews')/5, # x-axis with jitter
+            outcomen = 1,
+            outcomen = ifelse(outcome=='latenight', 2, outcomen),
+            outcomen = ifelse(outcome=='holiday', 3, outcomen),
+            panel = factor(outcomen, levels=1:3, labels=c('Weekend','Late night','Holiday')))
+summary.plot = ggplot(data=to.mean.plot.final, aes(x=x, y=mean, 
+      ymin=lower, ymax=upper, col=factor(data)))+
+  geom_point(size=4)+
+  geom_errorbar(width=0, size=1.1)+
+  scale_color_manual(NULL, values=cbPalette[3:5])+
+  scale_x_continuous(breaks=c(0,1), limits=c(-0.4, 1.4), labels=c('BMJ','BMJ Open'))+
+#  scale_shape_manual(NULL, values=c(15,16))+
+  theme_bw()+
+  theme(panel.grid.minor.x = element_blank())+
+  xlab('')+
+  ylab('Probability')+
+  facet_wrap(~panel)+
+  theme()
+summary.plot
+```
+
+Late nights were much more common than weekends.
+
+There was a higher probability of reviews on the weekend compared with submissions. 
+
+The only clear difference in journals was that late night reviews and submissions were more likely at BMJ than BMJ Open. 
+
+## Table of overall probabilities
+
+The table below shows the same information as the previous plot (CI = 95% credible interval).
+
+```{r summary.table}
+to.table = mutate(to.mean.plot.final) %>%
+  rename(Mean = mean, Journal = journal, Outcome=outcome, Type=data) %>%
+  mutate(CI = paste(round(lower*100)/100, ' to ', round(upper*100)/100, sep='')) %>%
+  select(Outcome, Type, Journal, Mean, CI)
+pander(to.table, digits=2, style='simple')
+```
+
+## Summary table of changes over time
+
+This table summarises the changes over time.
+
+```{r summary.table.time}
+to.table = mutate(table.time, 
+        data = ifelse(data=='submissions', 'Submission', data),
+        data = ifelse(data=='reviews', 'Reviews', data),
+        mean = round(mean*100)/100,
+        lower = round(lower*100)/100,
+        upper = round(upper*100)/100,
+        CI = paste(sprintf(lower, fmt='%4.2f'), ', ', sprintf(upper, fmt='%4.2f'), sep=''),
+        res = paste(sprintf(mean, fmt='%4.2f'), ' (', CI, ')', sep='') ) %>%
+  select(outcome, journal, data, var, res) %>%
+  rename(`Mean CI` = res) %>%
+  filter(var=='ratio') %>% select(-var) # Just ratio
+#  rename(type=data) %>% # for ratio and difference
+#  tidyr::spread(var, res) #
+pander(to.table, style='simple')
+```
