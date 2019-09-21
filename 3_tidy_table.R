@@ -1,4 +1,4 @@
-# 2_tidy_table.R
+# 3_tidy_table.R
 # function to tidy table for results from winbugs/jags, called by 2_analysis.Rmd
 # July 2019
 

@@ -469,7 +469,7 @@ for (type in c('slope','intercept')){
   }
 }
 DIC = mutate(DIC, Difference = DIC - min(DIC)) 
-to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+to.table = dplyr::select(DIC, -journal, -outcome, -data) %>% # information already in title
   arrange(DIC)
 pander(to.table, digits=0, style='simple')
 # load the results for the best model and store best DIC for later use
@@ -554,7 +554,7 @@ for (type in c('slope','intercept')){
   }
 }
 DIC = mutate(DIC, Difference = DIC - min(DIC)) 
-to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+to.table = dplyr::select(DIC, -journal, -outcome, -data) %>% # information already in title
   arrange(DIC)
 pander(to.table, digits=0, style='simple')
 # load the results for the best model
@@ -624,7 +624,7 @@ for (type in c('slope','intercept')){
   }
 }
 DIC = mutate(DIC, Difference = DIC - min(DIC)) 
-to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+to.table = dplyr::select(DIC, -journal, -outcome, -data) %>% # information already in title
   arrange(DIC)
 pander(to.table, digits=0, style='simple')
 # load the results for the best model
@@ -697,7 +697,7 @@ for (type in c('slope','intercept')){
   }
 }
 DIC = mutate(DIC, Difference = DIC - min(DIC)) 
-to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+to.table = dplyr::select(DIC, -journal, -outcome, -data) %>% # information already in title
   arrange(DIC)
 pander(to.table, digits=0, style='simple')
 # load the results for the best model
@@ -911,7 +911,7 @@ for (type in c('slope','intercept')){
   }
 }
 DIC = mutate(DIC, Difference = DIC - min(DIC)) 
-to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+to.table = dplyr::select(DIC, -journal, -outcome, -data) %>% # information already in title
   arrange(DIC)
 pander(to.table, digits=0, style='simple')
 # load the results for the best model
@@ -986,7 +986,7 @@ for (type in c('slope','intercept')){
   }
 }
 DIC = mutate(DIC, Difference = DIC - min(DIC)) 
-to.table = select(DIC, -journal, -outcome, -data) %>% # information already in title
+to.table = dplyr::select(DIC, -journal, -outcome, -data) %>% # information already in title
   arrange(DIC)
 pander(to.table, digits=0, style='simple')
 # load the results for the best model
@@ -1126,11 +1126,12 @@ for.plot = mutate(both, hour = floor(local.hour),
   summarise(count = n()) %>% 
   group_by(type, journal) %>%
   mutate(total = sum(count),
+         hour = hour + 0.5, # move points to middle of hour
     perc = 100*count/total) %>%
   ungroup()
 # plot
 plot = ggplot(data=for.plot, aes(x=hour, y=perc, col=factor(journal)))+
-  geom_rect(xmin=6.5, xmax=17.5, ymin=-Inf, ymax=Inf, fill=grey(0.9), alpha=0.2, inherit.aes=FALSE)+ # in hours period
+  geom_rect(xmin=7, xmax=17.99, ymin=-Inf, ymax=Inf, fill=grey(0.9), alpha=0.2, inherit.aes=FALSE)+ # in hours period
   geom_vline(xintercept = c(6,12,18), col=grey(0.8))+ # home-made grid because of rect
   geom_hline(yintercept = seq(2,10,2), col=grey(0.8))+ # home-made grid because of rect
   geom_point()+
@@ -1138,14 +1139,16 @@ plot = ggplot(data=for.plot, aes(x=hour, y=perc, col=factor(journal)))+
   scale_color_manual(NULL, values=c('dark red','dark blue'))+
   scale_x_continuous(breaks=c(0,6,12,18,24))+
   scale_y_continuous(breaks=c(0,2,4,6,8,10), limits = c(0, NA))+
-  geom_line()+
+  geom_line(size=1.01)+
   theme_bw()+
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  theme(text = element_text(size=12), # increase text size for BMJ
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())+
   xlab('Hour of day')+
   ylab('Percent')+
   facet_wrap(~type, scale='free_y')
 plot
-jpeg('figures/timeday.jpg', width=6, height=4, units='in', res=400, quality=100)
+jpeg('figures/BarnettFig1.jpg', width=7.8, height=5.2, units='in', res=400, quality=100)
 print(plot)
 invisible(dev.off())
 ```
@@ -1204,20 +1207,20 @@ for (which.data.text in c('Submission','Reviews')){
 
 The plot below summarises the twelve models using the countries' estimated probabilities. It shows each country's relative rank with 0 (blue) meaning they were the lowest ranked country, 1 (red) the highest, and 0.5 (white) in the middle. We do not show countries with small numbers. The countries are ordered based on their average probability. The plot only shows the mean rank and not the variability in rank.
 
-```{r tile.plot, fig.width=10, fig.height=8}
+```{r tile.plot, fig.width=12, fig.height=10}
 # process tile data data
 to.plot = filter(to.tile, Count > 100) %>% # remove small counts
   group_by(Country) %>%
   mutate(n = n(), overall = mean(median)) %>% # mean of median
   filter(n == 12) %>% # must have all 12 rows
   ungroup() %>%
-  select(-outcome, -journal, -n)
+  dplyr::select(-outcome, -journal, -n)
 ordering = group_by(to.plot, Country) %>%# order by high to low
   slice(1) %>% # first row only
   ungroup() %>%
   arrange(overall) %>% # arrange by overall median
   mutate(rank = 1:n()) %>% 
-  select(Country, rank) %>%
+  dplyr::select(Country, rank) %>%
   mutate(xaxis = factor(rank, labels=Country))
 # x-axis labels
 j.labels = dplyr::select(to.tile, k, journal) %>% unique() 
@@ -1236,28 +1239,30 @@ tile = ggplot(data=to.plot, aes(x=xaxis, y=k, fill=median))+
   scale_fill_gradient2('Rank', low = 'dark blue', mid = 'white', high='dark red', na.value='light green', midpoint = 0.5, breaks=c(0.03, 0.5, 1), labels=c('Lowest','Median','Highest'))+
   g.theme+
   coord_flip(clip = 'off')+
-  theme(text = element_text(size=13),
-        axis.text.y = element_text(size=15),
-    plot.margin=unit(c(0.7,0,1,0),"cm")) + # increase margin = top, then right, bottom and left
+  theme(text = element_text(size=14),
+        legend.text = element_text(size=16),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=17),
+    plot.margin=unit(c(0.9,0,1.2,0),"cm")) + # increase margin = top, then right, bottom and left
   # add vertical lines
   geom_hline(yintercept = c(4.5,8.5)) + # Add vertical lines to tile plot to split holidays, late nights, and weekends
   # axis label outside the plot
-  geom_text(y=1.5, x=-0.5, label='Submissions', size=4.5, fontface='plain')+
-  geom_text(y=3.5, x=-0.5, label='Reviews', size=4.5, fontface='plain')+
-  geom_text(y=5.5, x=-0.5, label='Submissions', size=4.5, fontface='plain')+
-  geom_text(y=7.5, x=-0.5, label='Reviews', size=4.5, fontface='plain')+
-  geom_text(y=9.5, x=-0.5, label='Submissions', size=4.5, fontface='plain')+
-  geom_text(y=11.5, x=-0.5, label='Reviews', size=4.5, fontface='plain')+
+  geom_text(y=1.5, x=-0.5, label='Submissions', size=6, fontface='plain')+
+  geom_text(y=3.5, x=-0.5, label='Reviews', size=6, fontface='plain')+
+  geom_text(y=5.5, x=-0.5, label='Submissions', size=6, fontface='plain')+
+  geom_text(y=7.5, x=-0.5, label='Reviews', size=6, fontface='plain')+
+  geom_text(y=9.5, x=-0.5, label='Submissions', size=6, fontface='plain')+
+  geom_text(y=11.5, x=-0.5, label='Reviews', size=6, fontface='plain')+
   #
-  geom_text(y=2.5, x=-1, label='Weekends', size=4.5, fontface='plain')+
-  geom_text(y=6.5, x=-1, label='Late nights', size=4.5, fontface='plain')+
-  geom_text(y=10.5, x=-1, label='Holidays', size=4.5, fontface='plain')+
+  geom_text(y=2.5, x=-1, label='Weekends', size=6, fontface='plain')+
+  geom_text(y=6.5, x=-1, label='Late nights', size=6, fontface='plain')+
+  geom_text(y=10.5, x=-1, label='Holidays', size=6, fontface='plain')+
   # repeat at top
-  geom_text(y=2.5, x=17, label='Weekends', size=4.5, fontface='plain')+
-  geom_text(y=6.5, x=17, label='Late nights', size=4.5, fontface='plain')+
-  geom_text(y=10.5, x=17, label='Holidays', size=4.5, fontface='plain')
+  geom_text(y=2.5, x=17, label='Weekends', size=6, fontface='plain')+
+  geom_text(y=6.5, x=17, label='Late nights', size=6, fontface='plain')+
+  geom_text(y=10.5, x=17, label='Holidays', size=6, fontface='plain')
 tile
-jpeg('figures/tile.jpg', width=10, height=8, units='in', res=400, quality = 100)
+jpeg('figures/BarnettFig3.jpg', width=12, height=10, units='in', res=400, quality = 100) # bigger size for BMJ
 print(tile)
 invisible(dev.off())
 ```
@@ -1311,13 +1316,15 @@ The table below shows the same information as the previous plot (CI = 95% credib
 to.table = mutate(to.mean.plot.final) %>%
   rename(Mean = mean, Journal = journal, Outcome=outcome, Type=data) %>%
   mutate(CI = paste(round(lower*100)/100, ' to ', round(upper*100)/100, sep='')) %>%
-  select(Outcome, Type, Journal, Mean, CI)
+  dplyr::select(Outcome, Type, Journal, Mean, CI)
 pander(to.table, digits=2, style='simple')
 ```
 
 ## Summary table of changes over time
 
 This table summarises the changes over time.
+
+### Probability ratios
 
 ```{r summary.table.time}
 to.table = mutate(table.time, 
@@ -1328,10 +1335,25 @@ to.table = mutate(table.time,
         upper = round(upper*100)/100,
         CI = paste(sprintf(lower, fmt='%4.2f'), ', ', sprintf(upper, fmt='%4.2f'), sep=''),
         res = paste(sprintf(mean, fmt='%4.2f'), ' (', CI, ')', sep='') ) %>%
-  select(outcome, journal, data, var, res) %>%
+  dplyr::select(outcome, journal, data, var, res) %>%
   rename(`Mean CI` = res) %>%
-  filter(var=='ratio') %>% select(-var) # Just ratio
-#  rename(type=data) %>% # for ratio and difference
-#  tidyr::spread(var, res) #
+  filter(var=='ratio') %>% dplyr::select(-var) # Just ratio
+pander(to.table, style='simple')
+```
+
+### Probability differences (absolute)
+
+```{r summary.table.time.absolute}
+to.table = mutate(table.time, 
+        data = ifelse(data=='submissions', 'Submission', data),
+        data = ifelse(data=='reviews', 'Reviews', data),
+        mean = round(mean*1000)/1000,
+        lower = round(lower*1000)/1000,
+        upper = round(upper*1000)/1000,
+        CI = paste(sprintf(lower, fmt='%4.3f'), ', ', sprintf(upper, fmt='%4.3f'), sep=''),
+        res = paste(sprintf(mean, fmt='%4.3f'), ' (', CI, ')', sep='') ) %>%
+  dplyr::select(outcome, journal, data, var, res) %>%
+  rename(`Mean CI` = res) %>%
+  filter(var=='diff') %>% dplyr::select(-var) # Just difference
 pander(to.table, style='simple')
 ```
