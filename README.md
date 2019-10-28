@@ -1,5 +1,5 @@
 # Researchers working out-of-hours
-Examining submissions and reviews to two journals (_BMJ_ and _BMJ Open_) on weekends, early mornings / late nights, and holidays.
+Examining submissions and peer reviews to two journals (_BMJ_ and _BMJ Open_) on weekends, early mornings / late nights, and holidays.
 
 The files are:
 * Lists of national holidays used in countries with holiday data available (`holidays.md`)
@@ -10,4 +10,4 @@ The files are:
 * Data in subfolder
 * Selected figures in subfolder
 
-The data subfolder contains the data in R format used to run the analyses after processing to remove excluded submissions and reviews.
+The data subfolder contains the data in R format used to run the analyses after processing to remove excluded submissions and peer reviews.
