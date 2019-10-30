@@ -1,23 +1,6 @@
 National holidays in countries. Countries listed in alphabetical order.
 
-# Austria 
-2012: Jan-1, Jan-6, Apr-9, May-1, May-17, May-28, Jun-7, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
-
-2013: Jan-1, Jan-6, Apr-1, May-1, May-9, May-20, May-30, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
-
-2014: Jan-1, Jan-6, Apr-21, May-1, May-29, Jun-9, Jun-19, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
-
-2015: Jan-1, Jan-6, Apr-6, May-1, May-14, May-25, Jun-4, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
-
-2016: Jan-1, Jan-6, Mar-28, May-1, May-5, May-16, May-26, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
-
-2017: Jan-1, Jan-6, Apr-17, May-1, May-25, Jun-5, Jun-15, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
-
-2018: Jan-1, Jan-6, Apr-2, May-1, May-10, May-21, May-31, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
-
-2019: Jan-1, Jan-6, Apr-22, May-1, May-30, Jun-10, Jun-20, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
-
-# Australia 
+## Australia 
 2012: Jan-1, Jan-26, Apr-6, Apr-9, Apr-25, Dec-25, Dec-26
 
 2013: Jan-1, Jan-26, Mar-29, Apr-1, Apr-25, Dec-25, Dec-26
@@ -33,6 +16,23 @@ National holidays in countries. Countries listed in alphabetical order.
 2018: Jan-1, Jan-26, Mar-30, Apr-2, Apr-25, Dec-25, Dec-26
 
 2019: Jan-1, Jan-26, Apr-19, Apr-22, Apr-25, Dec-25, Dec-26
+
+## Austria 
+2012: Jan-1, Jan-6, Apr-9, May-1, May-17, May-28, Jun-7, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
+
+2013: Jan-1, Jan-6, Apr-1, May-1, May-9, May-20, May-30, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
+
+2014: Jan-1, Jan-6, Apr-21, May-1, May-29, Jun-9, Jun-19, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
+
+2015: Jan-1, Jan-6, Apr-6, May-1, May-14, May-25, Jun-4, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
+
+2016: Jan-1, Jan-6, Mar-28, May-1, May-5, May-16, May-26, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
+
+2017: Jan-1, Jan-6, Apr-17, May-1, May-25, Jun-5, Jun-15, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
+
+2018: Jan-1, Jan-6, Apr-2, May-1, May-10, May-21, May-31, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
+
+2019: Jan-1, Jan-6, Apr-22, May-1, May-30, Jun-10, Jun-20, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
 
 # Belgium 
 2012: Jan-1, Apr-8, Apr-9, May-1, May-17, May-28, Jul-21, Aug-15, Nov-1, Nov-11, Dec-25
@@ -51,7 +51,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Apr-21, Apr-22, May-1, May-30, Jun-10, Jul-21, Aug-15, Nov-1, Nov-11, Dec-25
 
-# Brazil 
+## Brazil 
 2012: Jan-1, Feb-21, Apr-6, Apr-8, Apr-21, May-1, Jun-7, Sep-7, Oct-12, Nov-2, Nov-15, Dec-25
 
 2013: Jan-1, Feb-12, Mar-29, Mar-31, Apr-21, May-1, May-30, Sep-7, Oct-12, Nov-2, Nov-15, Dec-25
@@ -68,7 +68,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Mar-5, Apr-19, Apr-21, Apr-21, May-1, Jun-20, Sep-7, Oct-12, Nov-2, Nov-15, Dec-25
 
-# Canada 
+## Canada 
 2012: Jan-1, Apr-6, Jul-1, Sep-3, Oct-8, Dec-25
 
 2013: Jan-1, Mar-29, Jul-1, Sep-2, Oct-14, Dec-25
@@ -85,24 +85,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Apr-19, Jul-1, Sep-2, Oct-14, Dec-25
 
-# Switzerland 
-2012: Jan-1, May-17, Aug-1, Dec-25
-
-2013: Jan-1, May-9, Aug-1, Dec-25
-
-2014: Jan-1, May-29, Aug-1, Dec-25
-
-2015: Jan-1, May-14, Aug-1, Dec-25
-
-2016: Jan-1, May-5, Aug-1, Dec-25
-
-2017: Jan-1, May-25, Aug-1, Dec-25
-
-2018: Jan-1, May-10, Aug-1, Dec-25
-
-2019: Jan-1, May-30, Aug-1, Dec-25
-
-# China 
+## China 
 2012: Jan-1, Jan-23, Apr-5, May-1, May-25, Sep-30, Oct-1
 
 2013: Jan-1, Feb-10, Apr-5, May-1, Jun-12, Sep-19, Oct-1
@@ -119,24 +102,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Feb-5, Apr-5, May-1, Jun-7, Sep-13, Oct-1
 
-# Germany 
-2012: Jan-1, Apr-6, Apr-9, May-1, May-17, May-28, Oct-3, Dec-25, Dec-26
-
-2013: Jan-1, Mar-29, Apr-1, May-1, May-9, May-20, Oct-3, Dec-25, Dec-26
-
-2014: Jan-1, Apr-18, Apr-21, May-1, May-29, Jun-9, Oct-3, Dec-25, Dec-26
-
-2015: Jan-1, Apr-3, Apr-6, May-1, May-14, May-25, Oct-3, Dec-25, Dec-26
-
-2016: Jan-1, Mar-25, Mar-28, May-1, May-5, May-16, Oct-3, Dec-25, Dec-26
-
-2017: Jan-1, Apr-14, Apr-17, May-1, May-25, Jun-5, Oct-3, Oct-31, Dec-25, Dec-26
-
-2018: Jan-1, Mar-30, Apr-2, May-1, May-10, May-21, Oct-3, Dec-25, Dec-26
-
-2019: Jan-1, Apr-19, Apr-22, May-1, May-30, Jun-10, Oct-3, Dec-25, Dec-26
-
-# Denmark 
+## Denmark 
 2012: Jan-1, Apr-5, Apr-6, Apr-8, Apr-9, May-4, May-17, May-18, May-27, May-28, Jun-5, Dec-24, Dec-25, Dec-26, Dec-31
 
 2013: Jan-1, Mar-28, Mar-29, Mar-31, Apr-1, Apr-26, May-9, May-10, May-19, May-20, Jun-5, Dec-24, Dec-25, Dec-26, Dec-31
@@ -153,24 +119,24 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Apr-18, Apr-19, Apr-21, Apr-22, May-17, May-30, May-31, Jun-5, Jun-9, Jun-10, Dec-24, Dec-25, Dec-26, Dec-31
 
-# Spain 
-2012: Jan-1, Jan-6, Apr-6, Apr-8, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+## Germany 
+2012: Jan-1, Apr-6, Apr-9, May-1, May-17, May-28, Oct-3, Dec-25, Dec-26
 
-2013: Jan-1, Jan-6, Mar-29, Mar-31, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+2013: Jan-1, Mar-29, Apr-1, May-1, May-9, May-20, Oct-3, Dec-25, Dec-26
 
-2014: Jan-1, Jan-6, Apr-18, Apr-20, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+2014: Jan-1, Apr-18, Apr-21, May-1, May-29, Jun-9, Oct-3, Dec-25, Dec-26
 
-2015: Jan-1, Jan-6, Apr-3, Apr-5, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+2015: Jan-1, Apr-3, Apr-6, May-1, May-14, May-25, Oct-3, Dec-25, Dec-26
 
-2016: Jan-1, Jan-6, Mar-25, Mar-27, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+2016: Jan-1, Mar-25, Mar-28, May-1, May-5, May-16, Oct-3, Dec-25, Dec-26
 
-2017: Jan-1, Jan-6, Apr-14, Apr-16, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+2017: Jan-1, Apr-14, Apr-17, May-1, May-25, Jun-5, Oct-3, Oct-31, Dec-25, Dec-26
 
-2018: Jan-1, Jan-6, Mar-30, Apr-1, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+2018: Jan-1, Mar-30, Apr-2, May-1, May-10, May-21, Oct-3, Dec-25, Dec-26
 
-2019: Jan-1, Jan-6, Apr-19, Apr-21, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+2019: Jan-1, Apr-19, Apr-22, May-1, May-30, Jun-10, Oct-3, Dec-25, Dec-26
 
-# Finland 
+## Finland 
 2012: Jan-1, Jan-6, Apr-6, Apr-8, Apr-9, May-1, May-17, May-27, Jun-22, Jun-23, Nov-24, Dec-6, Dec-24, Dec-25, Dec-26
 
 2013: Jan-1, Jan-6, Mar-29, Mar-31, Apr-1, May-1, May-9, May-19, Jun-21, Jun-22, Nov-23, Dec-6, Dec-24, Dec-25, Dec-26
@@ -187,7 +153,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Jan-6, Apr-19, Apr-21, Apr-22, May-1, May-30, Jun-9, Jun-21, Jun-22, Nov-23, Dec-6, Dec-24, Dec-25, Dec-26
 
-# France 
+## France 
 2012: Jan-1, Apr-9, May-1, May-8, May-17, May-28, Jul-14, Aug-15, Nov-1, Nov-11, Dec-25
 
 2013: Jan-1, Apr-1, May-1, May-8, May-9, May-20, Jul-14, Aug-15, Nov-1, Nov-11, Dec-25
@@ -204,24 +170,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Apr-22, May-1, May-8, May-30, Jun-10, Jul-14, Aug-15, Nov-1, Nov-11, Dec-25
 
-# United Kingdom 
-2012: Apr-6, Apr-9, May-7, May-28, Dec-25, Dec-26
-
-2013: Jan-1, Mar-29, Apr-1, May-6, May-27, Dec-25, Dec-26
-
-2014: Jan-1, Apr-18, Apr-21, May-5, May-26, Dec-25, Dec-26
-
-2015: Jan-1, Apr-3, Apr-6, May-4, May-25, Dec-25, Dec-28
-
-2016: Jan-1, Mar-25, Mar-28, May-2, May-30, Dec-26, Dec-27
-
-2017: Apr-14, Apr-17, May-1, May-29, Dec-25, Dec-26
-
-2018: Jan-1, Mar-30, Apr-2, May-7, May-28, Dec-25, Dec-26
-
-2019: Jan-1, Apr-19, Apr-22, May-6, May-27, Dec-25, Dec-26
-
-# Greece 
+## Greece 
 2012: Jan-1, Jan-6, Feb-27, Mar-25, Mar-25, Apr-13, Apr-15, Apr-16, May-1, Jun-3, Jun-4, Aug-15, Oct-28, Dec-25, Dec-26
 
 2013: Jan-1, Jan-6, Mar-18, Mar-25, Mar-25, May-1, May-3, May-5, May-6, Jun-23, Jun-24, Aug-15, Oct-28, Dec-25, Dec-26
@@ -238,7 +187,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Jan-6, Mar-11, Mar-25, Mar-25, Apr-26, Apr-28, Apr-29, May-1, Jun-16, Jun-17, Aug-15, Oct-28, Dec-25, Dec-26
 
-# Ireland 
+## Ireland 
 2012: Jan-1, Mar-17, Apr-9, May-7, Jun-4, Aug-6, Oct-29, Dec-25, Dec-26
 
 2013: Jan-1, Mar-17, Apr-1, May-6, Jun-3, Aug-5, Oct-28, Dec-25, Dec-26
@@ -255,7 +204,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Mar-17, Apr-22, May-6, Jun-3, Aug-5, Oct-28, Dec-25, Dec-26
 
-# Italy 
+## Italy 
 2012: Jan-1, Jan-6, Apr-8, Apr-9, Apr-25, May-1, Jun-2, Aug-15, Nov-1, Dec-8, Dec-25, Dec-26
 
 2013: Jan-1, Jan-6, Mar-31, Apr-1, Apr-25, May-1, Jun-2, Aug-15, Nov-1, Dec-8, Dec-25, Dec-26
@@ -272,7 +221,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Jan-6, Apr-21, Apr-22, Apr-25, May-1, Jun-2, Aug-15, Nov-1, Dec-8, Dec-25, Dec-26
 
-# Japan 
+## Japan 
 2012: Jan-2, Jan-9, Feb-11, Apr-30, May-3, May-4, May-5, Jul-16, Aug-11, Sep-17, Oct-8, Nov-3, Nov-23, Dec-24
 
 2013: Jan-1, Jan-14, Feb-11, Apr-29, May-3, May-4, May-6, Jul-15, Aug-12, Sep-16, Oct-14, Nov-4, Nov-23, Dec-23
@@ -289,7 +238,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Jan-14, Feb-11, Apr-29, May-3, May-4, May-6, Jul-15, Aug-12, Sep-16, Oct-14, Nov-4, Nov-23, Dec-23
 
-# Mexico 
+## Mexico 
 2012: Jan-2, Feb-6, Mar-19, May-1, Sep-17, Nov-19, Nov-30, Dec-25
 
 2013: Jan-1, Feb-4, Mar-18, May-1, Sep-16, Nov-18, Dec-25
@@ -306,7 +255,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Feb-4, Mar-18, May-1, Sep-16, Nov-18, Dec-25
 
-# Netherlands 
+## Netherlands 
 2012: Jan-1, Apr-6, Apr-8, Apr-9, Apr-27, May-5, May-17, May-28, Dec-25, Dec-26
 
 2013: Jan-1, Mar-29, Mar-31, Apr-1, Apr-27, May-5, May-9, May-20, Dec-25, Dec-26
@@ -323,24 +272,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Apr-19, Apr-21, Apr-22, Apr-27, May-5, May-30, Jun-10, Dec-25, Dec-26
 
-# Norway 
-2012: Jan-1, Apr-5, Apr-6, Apr-8, Apr-9, May-1, May-17, May-17, May-27, May-28, Dec-25, Dec-26
-
-2013: Jan-1, Mar-28, Mar-29, Mar-31, Apr-1, May-1, May-9, May-17, May-19, May-20, Dec-25, Dec-26
-
-2014: Jan-1, Apr-17, Apr-18, Apr-20, Apr-21, May-1, May-17, May-29, Jun-8, Jun-9, Dec-25, Dec-26
-
-2015: Jan-1, Apr-2, Apr-3, Apr-5, Apr-6, May-1, May-14, May-17, May-24, May-25, Dec-25, Dec-26
-
-2016: Jan-1, Mar-24, Mar-25, Mar-27, Mar-28, May-1, May-5, May-15, May-16, May-17, Dec-25, Dec-26
-
-2017: Jan-1, Apr-13, Apr-14, Apr-16, Apr-17, May-1, May-17, May-25, Jun-4, Jun-5, Dec-25, Dec-26
-
-2018: Jan-1, Mar-29, Mar-30, Apr-1, Apr-2, May-1, May-10, May-17, May-20, May-21, Dec-25, Dec-26
-
-2019: Jan-1, Apr-18, Apr-19, Apr-21, Apr-22, May-1, May-17, May-30, Jun-9, Jun-10, Dec-25, Dec-26
-
-# New Zealand 
+## New Zealand 
 2012: Jan-2, Jan-2, Feb-6, Apr-6, Apr-9, Apr-25, Jun-4, Oct-22, Dec-25, Dec-26
 
 2013: Jan-1, Jan-2, Feb-6, Mar-29, Apr-1, Apr-25, Jun-3, Oct-28, Dec-25, Dec-26
@@ -357,7 +289,24 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Jan-2, Feb-6, Apr-19, Apr-22, Apr-25, Jun-3, Oct-28, Dec-25, Dec-26
 
-# Poland 
+## Norway 
+2012: Jan-1, Apr-5, Apr-6, Apr-8, Apr-9, May-1, May-17, May-17, May-27, May-28, Dec-25, Dec-26
+
+2013: Jan-1, Mar-28, Mar-29, Mar-31, Apr-1, May-1, May-9, May-17, May-19, May-20, Dec-25, Dec-26
+
+2014: Jan-1, Apr-17, Apr-18, Apr-20, Apr-21, May-1, May-17, May-29, Jun-8, Jun-9, Dec-25, Dec-26
+
+2015: Jan-1, Apr-2, Apr-3, Apr-5, Apr-6, May-1, May-14, May-17, May-24, May-25, Dec-25, Dec-26
+
+2016: Jan-1, Mar-24, Mar-25, Mar-27, Mar-28, May-1, May-5, May-15, May-16, May-17, Dec-25, Dec-26
+
+2017: Jan-1, Apr-13, Apr-14, Apr-16, Apr-17, May-1, May-17, May-25, Jun-4, Jun-5, Dec-25, Dec-26
+
+2018: Jan-1, Mar-29, Mar-30, Apr-1, Apr-2, May-1, May-10, May-17, May-20, May-21, Dec-25, Dec-26
+
+2019: Jan-1, Apr-18, Apr-19, Apr-21, Apr-22, May-1, May-17, May-30, Jun-9, Jun-10, Dec-25, Dec-26
+
+## Poland 
 2012: Jan-1, Jan-6, Apr-8, Apr-9, May-1, May-3, May-27, Jun-7, Aug-15, Nov-1, Nov-11, Dec-25, Dec-26
 
 2013: Jan-1, Jan-6, Mar-31, Apr-1, May-1, May-3, May-19, May-30, Aug-15, Nov-1, Nov-11, Dec-25, Dec-26
@@ -374,7 +323,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Jan-6, Apr-21, Apr-22, May-1, May-3, Jun-9, Jun-20, Aug-15, Nov-1, Nov-11, Dec-25, Dec-26
 
-# Portugal 
+## Portugal 
 2012: Jan-1, Feb-21, Apr-6, Apr-8, Apr-25, May-1, Jun-7, Jun-10, Aug-15, Oct-5, Nov-1, Dec-1, Dec-8, Dec-25
 
 2013: Jan-1, Feb-12, Mar-29, Mar-31, Apr-25, May-1, May-30, Jun-10, Aug-15, Oct-5, Nov-1, Dec-1, Dec-8, Dec-25
@@ -391,7 +340,41 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Mar-5, Apr-19, Apr-21, Apr-25, May-1, Jun-10, Jun-20, Aug-15, Oct-5, Nov-1, Dec-1, Dec-8, Dec-25
 
-# Sweden 
+## South Africa 
+2012: Jan-1, Mar-21, Apr-6, Apr-9, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
+
+2013: Jan-1, Mar-21, Mar-29, Apr-1, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
+
+2014: Jan-1, Mar-21, Apr-18, Apr-21, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
+
+2015: Jan-1, Mar-21, Apr-3, Apr-6, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
+
+2016: Jan-1, Mar-21, Mar-25, Mar-28, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
+
+2017: Jan-1, Mar-21, Apr-14, Apr-17, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
+
+2018: Jan-1, Mar-21, Mar-30, Apr-2, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
+
+2019: Jan-1, Mar-21, Apr-19, Apr-22, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
+
+## Spain 
+2012: Jan-1, Jan-6, Apr-6, Apr-8, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+
+2013: Jan-1, Jan-6, Mar-29, Mar-31, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+
+2014: Jan-1, Jan-6, Apr-18, Apr-20, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+
+2015: Jan-1, Jan-6, Apr-3, Apr-5, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+
+2016: Jan-1, Jan-6, Mar-25, Mar-27, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+
+2017: Jan-1, Jan-6, Apr-14, Apr-16, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+
+2018: Jan-1, Jan-6, Mar-30, Apr-1, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+
+2019: Jan-1, Jan-6, Apr-19, Apr-21, May-1, Aug-15, Oct-12, Nov-1, Dec-6, Dec-8, Dec-25
+
+## Sweden 
 2012: Jan-1, Jan-6, Apr-6, Apr-8, Apr-9, May-1, May-17, Jun-6, Jun-22, Jun-23, Nov-3, Dec-24, Dec-25, Dec-26, Dec-31
 
 2013: Jan-1, Jan-6, Mar-29, Mar-31, Apr-1, May-1, May-9, Jun-6, Jun-21, Jun-22, Nov-2, Dec-24, Dec-25, Dec-26, Dec-31
@@ -408,7 +391,24 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Jan-6, Apr-19, Apr-21, Apr-22, May-1, May-30, Jun-6, Jun-21, Jun-22, Nov-2, Dec-24, Dec-25, Dec-26, Dec-31
 
-# Turkey 
+## Switzerland 
+2012: Jan-1, May-17, Aug-1, Dec-25
+
+2013: Jan-1, May-9, Aug-1, Dec-25
+
+2014: Jan-1, May-29, Aug-1, Dec-25
+
+2015: Jan-1, May-14, Aug-1, Dec-25
+
+2016: Jan-1, May-5, Aug-1, Dec-25
+
+2017: Jan-1, May-25, Aug-1, Dec-25
+
+2018: Jan-1, May-10, Aug-1, Dec-25
+
+2019: Jan-1, May-30, Aug-1, Dec-25
+
+## Turkey 
 2012: Jan-1, Apr-23, May-1, May-19, Jul-15, Aug-30, Oct-29
 
 2013: Jan-1, Apr-23, May-1, May-19, Jul-15, Aug-30, Oct-29
@@ -425,7 +425,24 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Apr-23, May-1, May-19, Jul-15, Aug-30, Oct-29
 
-# United States 
+## United Kingdom 
+2012: Apr-6, Apr-9, May-7, May-28, Dec-25, Dec-26
+
+2013: Jan-1, Mar-29, Apr-1, May-6, May-27, Dec-25, Dec-26
+
+2014: Jan-1, Apr-18, Apr-21, May-5, May-26, Dec-25, Dec-26
+
+2015: Jan-1, Apr-3, Apr-6, May-4, May-25, Dec-25, Dec-28
+
+2016: Jan-1, Mar-25, Mar-28, May-2, May-30, Dec-26, Dec-27
+
+2017: Apr-14, Apr-17, May-1, May-29, Dec-25, Dec-26
+
+2018: Jan-1, Mar-30, Apr-2, May-7, May-28, Dec-25, Dec-26
+
+2019: Jan-1, Apr-19, Apr-22, May-6, May-27, Dec-25, Dec-26
+
+## United States 
 2012: Jan-2, Jan-16, Feb-20, May-28, Jul-4, Sep-3, Nov-12, Nov-22, Dec-25
 
 2013: Jan-1, Jan-21, Feb-18, May-27, Jul-4, Sep-2, Nov-11, Nov-28, Dec-25
@@ -441,20 +458,3 @@ National holidays in countries. Countries listed in alphabetical order.
 2018: Jan-1, Jan-15, Feb-19, May-28, Jul-4, Sep-3, Nov-12, Nov-22, Dec-25
 
 2019: Jan-1, Jan-21, Feb-18, May-27, Jul-4, Sep-2, Nov-11, Nov-28, Dec-25
-
-# South Africa 
-2012: Jan-1, Mar-21, Apr-6, Apr-9, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
-
-2013: Jan-1, Mar-21, Mar-29, Apr-1, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
-
-2014: Jan-1, Mar-21, Apr-18, Apr-21, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
-
-2015: Jan-1, Mar-21, Apr-3, Apr-6, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
-
-2016: Jan-1, Mar-21, Mar-25, Mar-28, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
-
-2017: Jan-1, Mar-21, Apr-14, Apr-17, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
-
-2018: Jan-1, Mar-21, Mar-30, Apr-2, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
-
-2019: Jan-1, Mar-21, Apr-19, Apr-22, Apr-27, May-1, Jun-16, Aug-9, Sep-24, Dec-16, Dec-25, Dec-26
