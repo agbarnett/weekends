@@ -34,7 +34,7 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Jan-6, Apr-22, May-1, May-30, Jun-10, Jun-20, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
 
-# Belgium 
+## Belgium 
 2012: Jan-1, Apr-8, Apr-9, May-1, May-17, May-28, Jul-21, Aug-15, Nov-1, Nov-11, Dec-25
 
 2013: Jan-1, Mar-31, Apr-1, May-1, May-9, May-20, Jul-21, Aug-15, Nov-1, Nov-11, Dec-25
@@ -119,23 +119,6 @@ National holidays in countries. Countries listed in alphabetical order.
 
 2019: Jan-1, Apr-18, Apr-19, Apr-21, Apr-22, May-17, May-30, May-31, Jun-5, Jun-9, Jun-10, Dec-24, Dec-25, Dec-26, Dec-31
 
-## Germany 
-2012: Jan-1, Apr-6, Apr-9, May-1, May-17, May-28, Oct-3, Dec-25, Dec-26
-
-2013: Jan-1, Mar-29, Apr-1, May-1, May-9, May-20, Oct-3, Dec-25, Dec-26
-
-2014: Jan-1, Apr-18, Apr-21, May-1, May-29, Jun-9, Oct-3, Dec-25, Dec-26
-
-2015: Jan-1, Apr-3, Apr-6, May-1, May-14, May-25, Oct-3, Dec-25, Dec-26
-
-2016: Jan-1, Mar-25, Mar-28, May-1, May-5, May-16, Oct-3, Dec-25, Dec-26
-
-2017: Jan-1, Apr-14, Apr-17, May-1, May-25, Jun-5, Oct-3, Oct-31, Dec-25, Dec-26
-
-2018: Jan-1, Mar-30, Apr-2, May-1, May-10, May-21, Oct-3, Dec-25, Dec-26
-
-2019: Jan-1, Apr-19, Apr-22, May-1, May-30, Jun-10, Oct-3, Dec-25, Dec-26
-
 ## Finland 
 2012: Jan-1, Jan-6, Apr-6, Apr-8, Apr-9, May-1, May-17, May-27, Jun-22, Jun-23, Nov-24, Dec-6, Dec-24, Dec-25, Dec-26
 
@@ -169,6 +152,23 @@ National holidays in countries. Countries listed in alphabetical order.
 2018: Jan-1, Apr-2, May-1, May-8, May-10, May-21, Jul-14, Aug-15, Nov-1, Nov-11, Dec-25
 
 2019: Jan-1, Apr-22, May-1, May-8, May-30, Jun-10, Jul-14, Aug-15, Nov-1, Nov-11, Dec-25
+
+## Germany 
+2012: Jan-1, Apr-6, Apr-9, May-1, May-17, May-28, Oct-3, Dec-25, Dec-26
+
+2013: Jan-1, Mar-29, Apr-1, May-1, May-9, May-20, Oct-3, Dec-25, Dec-26
+
+2014: Jan-1, Apr-18, Apr-21, May-1, May-29, Jun-9, Oct-3, Dec-25, Dec-26
+
+2015: Jan-1, Apr-3, Apr-6, May-1, May-14, May-25, Oct-3, Dec-25, Dec-26
+
+2016: Jan-1, Mar-25, Mar-28, May-1, May-5, May-16, Oct-3, Dec-25, Dec-26
+
+2017: Jan-1, Apr-14, Apr-17, May-1, May-25, Jun-5, Oct-3, Oct-31, Dec-25, Dec-26
+
+2018: Jan-1, Mar-30, Apr-2, May-1, May-10, May-21, Oct-3, Dec-25, Dec-26
+
+2019: Jan-1, Apr-19, Apr-22, May-1, May-30, Jun-10, Oct-3, Dec-25, Dec-26
 
 ## Greece 
 2012: Jan-1, Jan-6, Feb-27, Mar-25, Mar-25, Apr-13, Apr-15, Apr-16, May-1, Jun-3, Jun-4, Aug-15, Oct-28, Dec-25, Dec-26
