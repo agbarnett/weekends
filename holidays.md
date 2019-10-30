@@ -1,4 +1,5 @@
-National holidays in countries. In alphabetical order.
+National holidays in countries. Countries listed in alphabetical order.
+
 # Austria 
 2012: Jan-1, Jan-6, Apr-9, May-1, May-17, May-28, Jun-7, Aug-15, Oct-26, Nov-1, Dec-8, Dec-25, Dec-26
 
