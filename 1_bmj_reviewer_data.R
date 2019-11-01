@@ -1,23 +1,30 @@
 # 1_bmj_reviewer_data.R
 # read the BMJ & BMJ Open peer reviewer data from Sara and prepare it for analysis
-# July 2019
+# update after new data on 30 October 2019
+# October 2019
 library(readxl)
 library(dplyr)
 library(lubridate) # for force_tz and with_tz
 source('0_address_edits.R') # for common edits of address data
 
-# Notes from Sara:
-# Note - I have excluded our statisitcal reviewers as they are paid. We don't identify the reviews as statistical reviews so I did it by name 
-# I have only included completed reviews 2012 to 2018 that were for research and Research methods and Reporting articles
-# I have not excluded patient reviewers
-
-# get the data from Excel
-bmj.open = read_excel("data/BMJ Open_Completed reviewer data 2012 to 2018 for Adrian Barnett study.xlsx", col_names=TRUE) %>%
-  mutate(journal = 'BMJ Open')
-BMJ = read_excel("data/BMJ_Completed reviewer data 2012 to 2018 for Adrian Barnett study.xlsx", col_names=TRUE) %>%
-  mutate(journal = 'BMJ')
+## get the data from Excel, covers the dates 2012-01-01 to 2018-12-31
+# BMJ Open 68018 rows
+bmj.open = read_excel("data/oct2019/BMJ Open Reviews completed 2012 to 2019 for Adrian Barnett's study 4 (final).xlsx", col_names=TRUE, sheet='page') %>%
+  mutate(journal = 'BMJ Open') %>%
+  rename('Exclude' = `Exclude?`) %>%
+  select(-"Manuscript ID - Original",-"Manuscript ID", -"# Revisions")
+# BMJ 18868 rows
+BMJ = read_excel("data/oct2019/BMJ Completed reviewer data 2012 to 2019 for Adrian Barnett study 4 (final) indicating P&P reviewers.xls", col_names=TRUE) %>%
+  mutate(journal = 'BMJ') %>%
+  select(-"ManuscriptIDOriginal",-"ManuscriptID", -"@#Revisions") %>%
+  rename(
+    "Reviewer Person ID" = "ReviewerPersonID",
+    "Manuscript Type" = "ManuscriptType" , # add spaces
+    "Date Score Sheet Completed" = "DateScoreSheetCompleted",
+    'Reviewer Country/Region' = "ReviewerCountryRegion",
+    'Reviewer State/Province' = "ReviewerStateProvince",
+    "Reviewer City" = "ReviewerCity")
 bmj = bind_rows(bmj.open, BMJ) %>%
-  filter(is.na(`Reviewer Country/Region`) == FALSE) %>% # exclude 1198 with missing country
   rename(
     'city' = 'Reviewer City',
     'state' = 'Reviewer State/Province',
@@ -26,13 +33,30 @@ bmj = bind_rows(bmj.open, BMJ) %>%
     'datetime' = "Date Score Sheet Completed") %>% # 
   mutate(year = as.numeric(format(datetime, '%Y')),
          datetime = force_tz(datetime, tzone = 'EST')) %>% # change to NA # use force_tz because we only want to change timezone, not the hours and minutes
-  filter(year < 2019) %>% # remove papers in 2019 (reduce any seasonal confounding by using whole years)
   select(-year, -type) # unlikely to use these variables
-# common clean up of address data:
-bmj = address.edits(bmj)
 # numbers for CONSORT flow chart
 n.submitted.bmj = sum(bmj$journal == 'BMJ')
 n.submitted.bmjopen = sum(bmj$journal != 'BMJ')
+
+# exclude missing address
+bmj = filter(bmj, !is.na(country))
+n.missing.address = nrow(bmj)
+
+# common clean up of address data:
+bmj = address.edits(bmj)
+
+## Exclude statistical reviews
+bmj = filter(bmj, Exclude != 'Yes, statistician' | is.na(Exclude))
+n.excluded.stats = nrow(bmj)
+
+## Exclude Patient and public reviews 
+bmj = filter(bmj, Exclude != 'Possibly, patient and public reviewer' | is.na(Exclude))
+n.excluded.patients = nrow(bmj)
+
+## Exclude transfers from other journals
+bmj = filter(bmj, is.na(Exclude)) %>% # only transfer left in 
+  select(-Exclude, -starts_with("Transfer"), -starts_with('Receiving'))
+n.excluded.transfer = nrow(bmj)
 
 ## Exclude countries with under 100 submissions (currently counted across the two journals)
 over.100 = group_by(bmj, country) %>%
@@ -106,14 +130,6 @@ bmj = mutate(empty,
                 weekend = ifelse(country %in% c('India','Hong Kong','Mexico','Uganda'), weekday==7, weekend), # Sun only
     weekend = factor(as.numeric(weekend), levels = 0:1, labels = c('Weekday', 'Weekend'))) %>%
     dplyr::select(-weekday)
-## add after hours (late nights) - same for all countries
-bmj = mutate(bmj,
-             journal = factor(journal),
-             late.night = ifelse(local.hour < 7 | local.hour >= 18, 1, 0), # 6:00pm to 6:59am (before 7:00am)
-             late.night = factor(late.night,
-                                 levels = 0:1,
-                                 labels = c('No', 'Yes')
-             ))
 
 ## add public holidays
 load('data/holidays.RData') # from 0_country_holidays.R
@@ -150,23 +166,23 @@ reviews.weekend = arrange(reviewer, local.date) %>%
          denom = Weekday + Weekend) %>%
   rename('dep' = 'Weekend') # identify dependent variable for winbugs
 reviews.weekend = left_join(reviews.weekend, for.merge, by='window')
-# b) weekly counts for latenights
-reviews.latenight = arrange(reviewer, window) %>%
-  group_by(journal, window, country, late.night) %>%
-  summarise(count = n()) %>%
-  tidyr::spread(key=late.night, value=count) %>% # put weekends and weekdays on same row
-  mutate(No = ifelse(is.na(No), 0, No), # replace missing with zero
-         Yes = ifelse(is.na(Yes), 0, Yes),
-         denom = No + Yes) %>%
-  rename('dep' = 'Yes') # identify dependent variable for winbugs
-reviews.latenight = left_join(reviews.latenight, for.merge, by='window')
 
 ## Save
 reviewer.numbers = data.frame(n.bmj = n.submitted.bmj,
                      n.bmjopen = n.submitted.bmjopen,
+                     n.missing.address = n.missing.address,
+                     n.excluded.stats = n.excluded.stats,
+                     n.excluded.patients = n.excluded.patients,
+                     n.excluded.transfer = n.excluded.transfer,
                      n.post.exclude.100 = n.post.exclude.100,
                      n.post.exclude.differing.country = n.post.exclude.differing.country,
                      n.post.exclude.100.second = n.post.exclude.100.second,
                      n.after.geomatch = n.after.geomatch,
                      n.after.windows = n.after.windows)
-save(reviewer, reviews.weekend, reviews.latenight, reviewer.numbers, file='data/BMJAnalysisReadyReviewers.RData')
+save(reviewer, reviews.weekend, reviewer.numbers, file='data/BMJAnalysisReadyReviewers.RData')
+
+# version for sharing on github
+reviewer = dplyr::select(reviewer, local.date, local.hour, window, country, journal, timezoneId, weekend, holiday)
+save(reviewer, file='data/BMJReviewers.RData')
+
+
