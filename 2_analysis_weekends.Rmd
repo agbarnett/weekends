@@ -509,9 +509,10 @@ The countries are ordered by their mean probability, making it easier to spot pa
 source('2_plot_intercepts.R')
 iplot
 # export to journal for best model for weekend submissions (example forest plot)
-jpeg('figures/BarnettFig3.jpg', width=5.5, height=4.25, units='in', res=400, quality = 100) # bigger size for BMJ
+jpeg('figures/BarnettFig1.jpg', width=5.5, height=4.25, units='in', res=400, quality = 100) # bigger size for BMJ
 print(iplot)
 invisible(dev.off())
+best.plot.bmj.weekend.manuscripts = iplot # store for later multi-panel plot
 ```
 
 There are large differences between countries in the probability of submitting on the weekend. The lowest average probability is in India and the highest average in China. In China the probability is very high and almost equivalent to an equal probability on any day of the week as 2 days out of 7 is a probability of 0.29.
@@ -589,6 +590,7 @@ There was almost no difference in the overall probability of weekend submissions
 ```{r plot.intercepts.bmjopen.weekend.submissions}
 source('2_plot_intercepts.R')
 iplot
+best.plot.bmjopen.weekend.manuscripts = iplot # store for later multi-panel plot
 ```
 
 There is a very large difference between countries in the probability of weekend submissions to BMJ Open. China and Taiwan both also have relatively high probabilities of weekend submissions.
@@ -657,6 +659,7 @@ There was no change in the probability of weekend reviews over time.
 ```{r plot.intercepts.bmj.weekends.reviews}
 source('2_plot_intercepts.R')
 iplot
+best.plot.bmj.weekend.reviews = iplot # store for later multi-panel plot
 ```
 
 Finland had the lowest probability of weekend reviews and Austria the highest.
@@ -735,6 +738,7 @@ There was a very small increase in weekend reviews over time.
 ```{r plot.intercepts.bmjopen.weekends.reviews}
 source('2_plot_intercepts.R')
 iplot
+best.plot.bmjopen.weekend.reviews = iplot # store for later multi-panel plot
 ```
 
 There is a large variability between countries in the probability of weekend reviews. The highest probability is in Israel and the lowest in Ireland.
@@ -1041,7 +1045,7 @@ China has the highest increase in reviews, with an average 57% higher during the
 both.results.submissions = mutate(both.results.submissions, panel= 1)
 both.results.reviews = mutate(both.results.reviews, panel = 2)
 to.plot = bind_rows(both.results.submissions, both.results.reviews) %>%
-  mutate(panel = factor(panel, levels=1:2, labels=c('Submissions','Peer reviews')))
+  mutate(panel = factor(panel, levels=1:2, labels=c('Manuscripts','Peer reviews')))
 # scatter plot
 splot = ggplot(data=to.plot, aes(x=phase.time, y=exp(amp), label=country))+
   geom_point(col='skyblue')+
@@ -1054,7 +1058,7 @@ splot = ggplot(data=to.plot, aes(x=phase.time, y=exp(amp), label=country))+
   theme(text = element_text(size=14))+ # changes size of all text bar labels
   facet_wrap(~panel)
 # for journal
-jpeg('figures/BarnettFig2.jpg', width=10, height=5, units='in', res=400, quality=100)
+jpeg('figures/BarnettFig4.jpg', width=10, height=5, units='in', res=400, quality=100)
 print(splot)
 invisible(dev.off())
 ```
@@ -1092,10 +1096,11 @@ The plot shows the percent of submissions and reviews by hour, split by each jou
 ```{r summary.24hour.plot, fig.width=11, fig.height=6}
 # get counts, then percents
 for.plot = mutate(both, hour = floor(local.hour),
-                  type = ifelse(type=='Submission', 'Submissions', type)) %>% # tiny change to label
-  group_by(type, journal, hour) %>%
+                  typenum = ifelse(type=='Submission', 1, 2),
+                  typenum = factor(typenum, levels=1:2, labels=c('Manuscripts','Peer reviews'))) %>% # change labels and put in right order
+  group_by(type, typenum, journal, hour) %>%
   summarise(count = n()) %>% 
-  group_by(type, journal) %>%
+  group_by(type, typenum, journal) %>%
   mutate(total = sum(count),
          hour = hour + 0.5, # move points to middle of hour
     perc = 100*count/total) %>%
@@ -1116,7 +1121,7 @@ plot = ggplot(data=for.plot, aes(x=hour, y=perc, col=factor(journal)))+
         panel.grid.minor = element_blank())+
   xlab('Hour of day')+
   ylab('Percent')+
-  facet_wrap(~type, scale='free_y')
+  facet_wrap(~typenum, scale='free_y')
 plot
 # for journal
 jpeg('figures/BarnettFig1.jpg', width=7.8, height=5.2, units='in', res=400, quality=100)
@@ -1145,6 +1150,7 @@ for (k in 1:nrow(DIC.best)){
 }
 # now add the holiday estimates
 to.tile.mean.holiday = NULL
+save.for.later = list()
 k = 0 # restart index for x-axis
 for (which.data.text in c('submission','reviewer')){
   for (which.journal in c('BMJ','BMJ Open')){
@@ -1153,10 +1159,16 @@ for (which.data.text in c('submission','reviewer')){
     load(paste('Z:/weekend/', jags.filename.results, sep=''))
   # get averages per country
   source('2_plot_intercepts.R')
+  save.for.later[[k]] = iplot # stored for later multi-panel plot  
   to.plot = mutate(to.plot, k=k, outcome = 'holiday', journal = which.journal, data=which.data.text, label = formatC( round(mean, 2), format='f', digits=2))
   to.tile.mean.holiday = bind_rows(to.tile.mean.holiday, to.plot)
   }
 }
+# for later multi-panel plot
+holidays.manuscripts.bmj = save.for.later[[1]]
+holidays.manuscripts.bmjopen = save.for.later[[2]]
+holidays.reviews.bmj = save.for.later[[3]]
+holidays.reviews.bmjopen = save.for.later[[4]]
 ```
 
 ### Summary plot of weekend estimates
@@ -1196,8 +1208,8 @@ tile.weekend = ggplot(data=to.plot, aes(x=xaxis, y=k, fill=mean, label=label))+
         axis.text.y = element_text(size=17),
         plot.margin=unit(c(0.9,0,1.2,0),"cm")) + # increase margin = top, then right, bottom and left
   # axis label outside the plot
-  geom_text(y=1.5, x=-0.5, label='Submissions', size=6, fontface='plain')+
-  geom_text(y=3.5, x=-0.5, label='Reviews', size=6, fontface='plain')
+  geom_text(y=1.5, x=-0.5, label='Manuscripts', size=6, fontface='plain')+
+  geom_text(y=3.5, x=-0.5, label='Peer reviews', size=6, fontface='plain')
 tile.weekend
 ```
 
@@ -1242,8 +1254,8 @@ tile.holiday = ggplot(data=to.plot, aes(x=xaxis, y=k, fill=mean, label=label))+
         axis.text.y = element_text(size=17),
         plot.margin=unit(c(0.9,0,1.2,0),"cm")) + # increase margin = top, then right, bottom and left
   # axis label outside the plot
-  geom_text(y=1.5, x=-0.5, label='Submissions', size=6, fontface='plain')+
-  geom_text(y=3.5, x=-0.5, label='Reviews', size=6, fontface='plain')
+  geom_text(y=1.5, x=-0.5, label='Manuscripts', size=6, fontface='plain')+
+  geom_text(y=3.5, x=-0.5, label='Peer reviews', size=6, fontface='plain')
 tile.holiday
 ```
 
@@ -1356,10 +1368,10 @@ tile = ggplot(data=to.plot, aes(x=xaxis, y=k, fill=median))+
   # add vertical lines
   geom_hline(yintercept = c(4.5,8.5)) + # Add vertical lines to tile plot to split holidays and weekends
   # axis label outside the plot
-  geom_text(y=1.5, x=-0.5, label='Submissions', size=6, fontface='plain')+
-  geom_text(y=3.5, x=-0.5, label='Reviews', size=6, fontface='plain')+
-  geom_text(y=5.5, x=-0.5, label='Submissions', size=6, fontface='plain')+
-  geom_text(y=7.5, x=-0.5, label='Reviews', size=6, fontface='plain')+
+  geom_text(y=1.5, x=-0.5, label='Manuscripts', size=6, fontface='plain')+
+  geom_text(y=3.5, x=-0.5, label='Peer reviews', size=6, fontface='plain')+
+  geom_text(y=5.5, x=-0.5, label='Manuscripts', size=6, fontface='plain')+
+  geom_text(y=7.5, x=-0.5, label='Peer reviews', size=6, fontface='plain')+
   #
   geom_text(y=2.5, x=-1, label='Weekends', size=6, fontface='plain')+
   geom_text(y=6.5, x=-1, label='Holidays', size=6, fontface='plain')+
@@ -1475,3 +1487,36 @@ to.table = mutate(table.time,
   filter(var=='diff') %>% dplyr::select(-var) # Just difference
 pander(to.table, style='simple')
 ```
+
+# Four by four panel for forest plots
+
+## Weekends
+
+```{r four.by.four.forest.weekends, fig.width=8, fig.height=8}
+# add titles
+best.plot.bmjopen.weekend.manuscripts = best.plot.bmjopen.weekend.manuscripts + ggtitle('BMJ Open, Manuscripts')
+best.plot.bmj.weekend.manuscripts = best.plot.bmj.weekend.manuscripts + ggtitle('BMJ, Manuscripts')
+best.plot.bmjopen.weekend.reviews = best.plot.bmjopen.weekend.reviews + ggtitle('BMJ Open, Peer reviews')
+best.plot.bmj.weekend.reviews = best.plot.bmj.weekend.reviews + ggtitle('BMJ, Peer reviews')
+# export
+jpeg('figures/BarnettFig.jpg', width=8, height=8, units='in', res=300, quality=100)
+grid.arrange(best.plot.bmj.weekend.manuscripts, best.plot.bmjopen.weekend.manuscripts, best.plot.bmj.weekend.reviews, best.plot.bmjopen.weekend.reviews, ncol=2, nrow=2)
+invisible(dev.off())
+grid.arrange(best.plot.bmj.weekend.manuscripts, best.plot.bmjopen.weekend.manuscripts, best.plot.bmj.weekend.reviews, best.plot.bmjopen.weekend.reviews, ncol=2, nrow=2)
+```
+
+## Holidays
+
+```{r four.by.four.forest.holidays, fig.width=8, fig.height=8}
+# add titles
+holidays.manuscripts.bmjopen = holidays.manuscripts.bmjopen + ggtitle('BMJ Open, manuscripts')
+holidays.manuscripts.bmj = holidays.manuscripts.bmj + ggtitle('BMJ, manuscripts')
+holidays.reviews.bmjopen = holidays.reviews.bmjopen + ggtitle('BMJ Open, Peer reviews')
+holidays.reviews.bmj = holidays.reviews.bmj + ggtitle('BMJ, Peer reviews')
+# export
+jpeg('figures/BarnettFigHolidays.jpg', width=8, height=8, units='in', res=300, quality=100)
+grid.arrange(holidays.manuscripts.bmj, holidays.manuscripts.bmjopen, holidays.reviews.bmj, holidays.reviews.bmjopen, ncol=2, nrow=2)
+invisible(dev.off())
+grid.arrange(holidays.manuscripts.bmj, holidays.manuscripts.bmjopen, holidays.reviews.bmj, holidays.reviews.bmjopen, ncol=2, nrow=2)
+```
+
