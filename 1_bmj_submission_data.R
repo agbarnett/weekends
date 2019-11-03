@@ -43,7 +43,7 @@ n.submitted.bmjopen = sum(bmj$journal != 'BMJ')
 bmj = filter(bmj, !is.na(country))
 n.missing.address = nrow(bmj)
 
-## Exclude transfers from other journals
+## Exclude transfers from BMJ or BMJ Open (avoid double counting)
 bmj = filter(bmj, is.na(bmj$`Exclude?`)) %>%
   select(-`Exclude?`, -`Transferring Journal Name`, -`Receiving Journal Name`, -`Transfer Date`, -"Author Person ID", -"Author Type Id")
 n.excluded.transfer = nrow(bmj)

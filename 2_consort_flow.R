@@ -40,7 +40,7 @@ l2 = paste(
     big.mark = ','
   ),
   ')\n',
-  '- Transfers other journals (n=',
+  '- Transfers between two\njournals (n=',
   format(
     with(
       indata,
@@ -49,7 +49,7 @@ l2 = paste(
     big.mark = ','
   ),
   ')\n',
-  '- Countries with under\n100 results (n=',
+  '- Countries with under 100\nresults (n=',
   format(
     with(
       indata,
@@ -184,7 +184,7 @@ flow.plot.review = function(indata, actual.data){
       big.mark = ','
     ),
     ')\n',
-    '- Transfers other journals (n=',
+    '- Transfers between two\njournals (n=',
     format(
       with(
         indata,
@@ -193,7 +193,7 @@ flow.plot.review = function(indata, actual.data){
       big.mark = ','
     ),
     ')\n',
-    '- Countries with under\n100 results (n=',
+    '- Countries with under 100\nresults (n=',
     format(
       with(
         indata,
@@ -251,7 +251,7 @@ flow.plot.review = function(indata, actual.data){
     text = '
 i	x	y	box.col	box.type	box.prop	box.size
 1	0.27	0.85	white	square	0.33	0.25
-2	0.7	0.48	white	square	1.01	0.28
+2	0.7	0.48	white	square	1.05	0.28
 4	0.27	0.11	white	square	0.27	0.25
 '
   )
@@ -313,14 +313,14 @@ plot.it = function(inlist, header, type='tiff') {
     y0 = 0.49,
     length = 0.12
   )
-} # end of plotit function
+} # end of plotit function for reviews
 
 # 
 #postscript('figures/consort.flow.eps', width=5, height=4.5, horiz=F)
 tiff(
   'figures/consort.flow.tif',
-  width = 10,
-  height = 5,
+  width = 10.5,
+  height = 5.5,
   units = 'in',
   res = 300,
   compression = 'lzw'
@@ -333,14 +333,14 @@ layout(1) # restore default layout
 # and jpeg
 jpeg(
   'figures/consort.flow.jpg',
-  width = 10,
-  height = 5,
+  width = 10.5,
+  height = 5.5,
   units = 'in',
   res = 300,
   quality=100
 )
 layout(matrix(c(1,2), ncol=2), widths=c(1,1), heights=1)
-plot.it(sub, header='Submissions')
-plot.it(rev, header='Reviews')
+plot.it(sub, header='Manuscripts')
+plot.it(rev, header='Peer reviews')
 dev.off()
 layout(1) # restore default layout

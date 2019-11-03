@@ -53,7 +53,7 @@ n.excluded.stats = nrow(bmj)
 bmj = filter(bmj, Exclude != 'Possibly, patient and public reviewer' | is.na(Exclude))
 n.excluded.patients = nrow(bmj)
 
-## Exclude transfers from other journals
+## Exclude transfers from BMJ or BMJ Open
 bmj = filter(bmj, is.na(Exclude)) %>% # only transfer left in 
   select(-Exclude, -starts_with("Transfer"), -starts_with('Receiving'))
 n.excluded.transfer = nrow(bmj)

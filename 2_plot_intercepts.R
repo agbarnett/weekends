@@ -6,6 +6,12 @@
 xref = filter(ests, num==1, var=='beta') %>%
   dplyr::select(-var, -num) %>%
   mutate_all( inv.logit) # back transform mean and 95% CI
+# alternative reference point for holidays
+if(str_detect(pattern='holiday',jags.filename.results) == TRUE){
+  xref = filter(ests, var=='overall') %>%
+    dplyr::select(-var, -num) %>%
+    mutate_all( inv.logit) # back transform mean and 95% CI
+}
 
 # plot country-specific intercepts
 country.numbers = mutate(country.numbers, # create frame of country numbers; is in alphabetical order
@@ -38,8 +44,8 @@ iplot = ggplot(data=to.plot, aes(x=xaxis, y=mean, ymin=lower, ymax=upper, col=fa
   xlab('')+
   geom_hline(yintercept = xref$mean, lty=2)+ # Add reference line at overall mean
   ylab('Probability')+
-  annotate('text', y=xref$mean, x=0, label='Higher than average', hjust=-0.05, size=3)+
-  annotate('text', y=xref$mean, x=0, label='Lower than average', hjust=1.05, size=3)+
+  annotate('text', y=xref$mean, x=0, label='Above average', hjust=-0.05, size=3)+
+  annotate('text', y=xref$mean, x=0, label='Below average', hjust=1.05, size=3)+
   g.theme +
   theme(axis.text.x = element_text(size=8), legend.position = 'none',
         panel.grid.major.y = element_blank())+
