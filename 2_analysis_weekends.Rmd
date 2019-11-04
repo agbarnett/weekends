@@ -508,10 +508,6 @@ The countries are ordered by their mean probability, making it easier to spot pa
 ```{r plot.intercepts.bmj.submissions}
 source('2_plot_intercepts.R')
 iplot
-# export to journal for best model for weekend submissions (example forest plot)
-jpeg('figures/BarnettFig1.jpg', width=5.5, height=4.25, units='in', res=400, quality = 100) # bigger size for BMJ
-print(iplot)
-invisible(dev.off())
 best.plot.bmj.weekend.manuscripts = iplot # store for later multi-panel plot
 ```
 
@@ -1124,7 +1120,7 @@ plot = ggplot(data=for.plot, aes(x=hour, y=perc, col=factor(journal)))+
   facet_wrap(~typenum, scale='free_y')
 plot
 # for journal
-jpeg('figures/BarnettFig1.jpg', width=7.8, height=5.2, units='in', res=400, quality=100)
+jpeg('figures/BarnettFig3.jpg', width=7.8, height=5.2, units='in', res=400, quality=100)
 print(plot)
 invisible(dev.off())
 ```
@@ -1269,7 +1265,7 @@ The rows in the plot are ordered using the average probability across the four c
 tile.weekend = tile.weekend + ggtitle("Weekends")
 tile.holiday = tile.holiday + ggtitle("Holidays")
 # export
-jpeg('figures/BarnettFig4.jpg', width=12, height=10, units='in', res=400, quality = 100) # bigger size for BMJ
+jpeg('figures/BarnettFig2.jpg', width=12, height=10, units='in', res=400, quality = 100) # bigger size for BMJ
 grid.arrange(tile.weekend, tile.holiday, ncol=2)
 invisible(dev.off())
 ```
@@ -1520,3 +1516,16 @@ invisible(dev.off())
 grid.arrange(holidays.manuscripts.bmj, holidays.manuscripts.bmjopen, holidays.reviews.bmj, holidays.reviews.bmjopen, ncol=2, nrow=2)
 ```
 
+## Double panel plot for journal
+
+Weekend and holiday manuscript submissions to _The BMJ_.
+
+```{r, fig.width=8, fig.height=4.5}
+best.plot.bmj.weekend.manuscripts = best.plot.bmj.weekend.manuscripts + ggtitle('Weekends')
+holidays.manuscripts.bmj = holidays.manuscripts.bmj + ggtitle('Holidays')
+# export to journal for best model for weekend submissions (example forest plot)
+jpeg('figures/BarnettFig1.jpg', width=11, height=4.25, units='in', res=400, quality = 100) # bigger size for BMJ
+grid.arrange(best.plot.bmj.weekend.manuscripts, holidays.manuscripts.bmj, ncol=2, nrow=1)
+invisible(dev.off())
+grid.arrange(best.plot.bmj.weekend.manuscripts, holidays.manuscripts.bmj, ncol=2, nrow=1)
+```
