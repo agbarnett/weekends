@@ -344,3 +344,72 @@ plot.it(sub, header='Manuscripts')
 plot.it(rev, header='Peer reviews')
 dev.off()
 layout(1) # restore default layout
+
+
+# percents, plus numerators and denominators
+show.percents = FALSE
+if(show.percents==TRUE){
+ cat('Manuscript exclusions:\n')
+ with(submission.numbers, cat('Total = ', n.bmjopen + n.bmj, '\n', sep='') )
+ #
+ total = submission.numbers$n.bmjopen + submission.numbers$n.bmj
+ numerator = total - submission.numbers$n.missing.address
+ with(submission.numbers, cat('Missing address = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = submission.numbers$n.missing.address
+ numerator = total - submission.numbers$n.excluded.transfer
+ with(submission.numbers, cat('Transfer = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = submission.numbers$n.excluded.transfer
+ numerator = total - submission.numbers$n.post.exclude.100
+ with(submission.numbers, cat('Under 100 = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = submission.numbers$n.post.exclude.100
+ numerator = total - submission.numbers$n.after.geomatch
+ with(submission.numbers, cat('No geocoded address = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = submission.numbers$n.after.geomatch
+ numerator = total - submission.numbers$n.post.exclude.differing.country
+ with(submission.numbers, cat('Differing country = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = submission.numbers$n.post.exclude.differing.country
+ numerator = total - submission.numbers$n.post.exclude.100.second
+ with(submission.numbers, cat('Under 100 = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ 
+ ##
+ cat('\nReviewer exclusions:\n')
+ with(reviewer.numbers, cat('Total = ', n.bmjopen + n.bmj, '\n', sep='') )
+ #
+ total = reviewer.numbers$n.bmjopen + reviewer.numbers$n.bmj
+ numerator = total - reviewer.numbers$n.missing.address
+ with(reviewer.numbers, cat('Missing address = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = reviewer.numbers$n.missing.address
+ numerator = total - reviewer.numbers$n.excluded.stats
+ with(reviewer.numbers, cat('Stats reviewer = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = reviewer.numbers$n.excluded.stats
+ numerator = total - reviewer.numbers$n.excluded.patients
+ with(reviewer.numbers, cat('Patient reviewer = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = reviewer.numbers$n.excluded.patients
+ numerator = total - reviewer.numbers$n.excluded.transfer
+ with(reviewer.numbers, cat('Transfer = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = reviewer.numbers$n.excluded.transfer
+ numerator = total - reviewer.numbers$n.post.exclude.100
+ with(reviewer.numbers, cat('Under 100 = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = reviewer.numbers$n.post.exclude.100
+ numerator = total - reviewer.numbers$n.after.geomatch
+ with(reviewer.numbers, cat('No geocoded address = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = reviewer.numbers$n.after.geomatch
+ numerator = total - reviewer.numbers$n.post.exclude.differing.country
+ with(reviewer.numbers, cat('Differing country = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ #
+ total = reviewer.numbers$n.post.exclude.differing.country
+ numerator = total - reviewer.numbers$n.post.exclude.100.second
+ with(reviewer.numbers, cat('Under 100 = ', round(100*numerator/total,1), '%, ', numerator, '/', total, '\n', sep='') )
+ 
+}

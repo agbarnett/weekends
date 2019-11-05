@@ -1528,4 +1528,27 @@ jpeg('figures/BarnettFig1.jpg', width=11, height=4.25, units='in', res=400, qual
 grid.arrange(best.plot.bmj.weekend.manuscripts, holidays.manuscripts.bmj, ncol=2, nrow=1)
 invisible(dev.off())
 grid.arrange(best.plot.bmj.weekend.manuscripts, holidays.manuscripts.bmj, ncol=2, nrow=1)
+
+# export to Word tables
+export.weekends = select(best.plot.bmj.weekend.manuscripts$data, xaxis, Country, mean, lower, upper) %>%
+mutate(Country = as.character(Country),
+       Country = ifelse(is.na(Country), 'Overall', Country ))
+export.hols = select(holidays.manuscripts.bmj$data, xaxis, Country, mean, lower, upper) %>%
+mutate(Country = as.character(Country),
+       Country = ifelse(is.na(Country), 'Overall', Country ))
+
+#
+e.file = 'export.tables.txt'
+out = file(e.file , 'w')
+cat('Weekends\n', file=out)
+for (k in 1:nrow(export.weekends)){
+  cat(export.weekends$xaxis[k], export.weekends$Country[k], export.weekends$mean[k], export.weekends$lower[k], export.weekends$upper[k], '\n', sep='&', file=out)
+}
+cat('\nHolidays\n', file=out)
+for (k in 1:nrow(export.hols)){
+  cat(export.hols$xaxis[k], export.hols$Country[k], export.hols$mean[k], export.hols$lower[k], export.hols$upper[k], '\n', sep='&', file=out)
+}
+close(out)
+
+
 ```
